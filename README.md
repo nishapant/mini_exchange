@@ -6,3 +6,4 @@ Teammates:
 
 1. Aman Khinvasara - amantk2@illinois.edu (Team Leader)
 2. Akhil Isanaka - isanaka2@illinois.edu
+3. Akul Gupta - akulg3@illinois.edu 

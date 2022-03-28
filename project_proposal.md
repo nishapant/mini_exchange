@@ -8,6 +8,8 @@ This project would involve implementing a mini exchange. It would consist primar
 In addition, we would also write a basic test app harnesses, which would make multiple connections to the gateway, send in multiple orders, and then validate that orders that should match do, orders that should rest in the order book do, and then that appropriate fill messages are received via the gateways, and that the correct market data updates are received from the ticker plant and dropcopy.
 
 ## Detailed Project Overview
+### Mini Exchange Architecture Diagram
+![Mini Exchange Architecture Diagram](design_diagram.png "Mini Exchange Architecture Diagram")
 ### Order Book/Matching Engine
 - A basic data structure that stores trade id and bid/ask prices
 - Supports add, remove, change operations

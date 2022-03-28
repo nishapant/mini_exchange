@@ -43,7 +43,7 @@ In addition, we would also write a basic test app harnesses, which would make mu
 - Rust Programming Language
 - Solana (if time permits)
 
-Steps:
+## Steps:
 1. Create a detailed overview of our project
 2. Finalize data protocol for input and output to each component
 3. Implement each component in parallel

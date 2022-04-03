@@ -1,3 +1,5 @@
+use std::time::SystemTime;
+
 #[derive(Debug, Clone)]
 pub struct Trade {
     pub trader_id: u32,
@@ -14,4 +16,34 @@ pub struct Trade {
 #[derive(Debug, Clone)]
 pub enum OrderType  {
     Market
+}
+
+#[derive(Debug, Clone)]
+pub enum Outcome  {
+    Accepted {
+        id: u64,
+        order_type: OrderType,
+        time_stamp: SystemTime,
+    },
+
+    Filled {
+        order_id: u64,
+        order_type: OrderType,
+        unit_price: f64,
+        qty: u32,
+        time_stamp: SystemTime,
+    },
+
+    PartiallyFilled {
+        order_id: u64,
+        order_type: OrderType,
+        unit_price: f64,
+        qty: u32,
+        time_stamp: SystemTime,
+    },
+
+    Cancelled { 
+         order_id: u64,
+         ts: SystemTime,
+    },
 }

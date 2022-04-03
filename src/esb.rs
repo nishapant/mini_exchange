@@ -1,18 +1,21 @@
-// mod trade;
-// mod orderbook;
-mod esb;
 use std::net::{TcpStream};
 use std::io::{Read, Write};
 use std::str::from_utf8;
 
+pub fn esb_logic() {
+    // let ip_address = 
+    // let port = 8080
+    // let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-fn main() {
-    println!("Hello, world!");
-    // esb_logic();
+    // for stream in listener.incoming() {
+    //     let stream = stream.unwrap();
 
-    match TcpStream::connect("localhost:8881") {
+    //     println!("Connection established!");
+    // }
+
+    match TcpStream::connect("localhost:3333") {
         Ok(mut stream) => {
-            println!("Successfully connected to server in port 8881");
+            println!("Successfully connected to server in port 3333");
 
             let msg = b"Hello!";
 

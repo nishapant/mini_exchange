@@ -5,7 +5,7 @@ pub struct Trade {
     pub trader_id: u32,
     pub stock_id: u32, //we could leave this blank and assume that our exchange only trades one asset type
     pub order_id: u64, //number assigned by the gateway that is sent back to the trader and used to edit/cancel orders
-    pub trade_type: bool, //buy or sell
+    pub trade_type: TradeType, //buy or sell
     pub order_type: OrderType, //What type of order (market, limit, etc)
     pub unit_price: f64, //price of share
     pub qty: u32, //number of the item they want to buy or sell
@@ -16,6 +16,12 @@ pub struct Trade {
 #[derive(Debug, Clone)]
 pub enum OrderType  {
     Market
+}
+
+#[derive(Debug, Clone)]
+pub enum TradeType  {
+    Buy, 
+    Sell
 }
 
 #[derive(Debug, Clone)]

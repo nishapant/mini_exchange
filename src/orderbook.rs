@@ -19,22 +19,7 @@ impl OrderBook {
         }
     }
 
-    // What can we really change here?
-    // Just the unit_price and qty?
-    pub fn modify (&mut self, trade_input: Trade) -> Result<T, E> {
-        //can take the modified trade and match it with the id number of the trade to modify
-        let mut trade = self.book.get(&trade_input.order_id).unwrap();
-        self.book.remove(&trade_input.order_id);
-        self.book.insert(trade_input.order_id, trade_input);
 
-        if trade_input.trade_type == True {
-
-        } else {
-
-        }
-
-        return Ok();
-    }
 
     fn get_bid_insert_idx(mut vec: Vec<Trade>, trade: Trade) -> usize {
         for i in 0..vec.len() - 1 {
@@ -56,60 +41,20 @@ impl OrderBook {
         return 0;
     }
 
-    fn insert_and_remove(mut vec: Vec<Trade>, input_trade: Trade, trade_type: bool) {
-        // the vector to insert into, the trade id to add (same as remove)
-        if trade_type {
-            let mut flag = false;
-            for i in 0..vec.len() - 1 {
-                if vec[i].order_id = input_trade.order_id {
-                    vec.remove(i);
-                }
-                if vec[i].unit_price > trade.unit_price && vec[i + 1].unit_price < trade.unit_price  {
-                    vec.insert(i, trade.clone());
-                    flag = true;
-                }
-
-            }
-            if !flag {
-                vec.insert(vec.len() - 1, input_trade.clone());
-            }
-        } else {
-
-        }
-
-    }
 
     //needs testing xd!
+    //TODO how do i declare the helper methods properly so that they can remain private?
     pub fn add (&mut self, trade: Trade) -> Result<T, E> {
         //insert into hashmap and then add to the appropriate array
         self.book.insert(trade.order_id,trade);
         //true is bid(buyers) and false is ask(seller)
         if Trade.trade_type == true {
-            let mut flag = false;
-            for i in 0..self.bids.len() - 1 {
-                if self.bids[i].unit_price > trade.unit_price && self.bids[i + 1].unit_price < trade.unit_price  {
-                    self.bids.insert(i, trade.clone());
-                    flag = true;
-                }
-            }
-            if !flag {
-                self.bids.insert(self.bids.len() - 1, trade.clone());
-            }
+            self.bids.insert(self.get_bid_insert_idx(&self.bids, &trade), trade.clone());
+        } else {
+            self.asks.insert(self.get_bid_insert_idx(&self.bids, &trade), trade.clone());
         }
 
-        // else {
-        //     let mut flag = false;
-        //     for i in 0..self.bids.len() - 1 {
-        //         if self.bids[i] < trade.unit_price && self.bids[i + 1].unit_price > trade.unit_price  {
-        //             self.bids.insert(i, trade.clone());
-        //             flag = true;
-        //         }
-        //     }
-        //     if !flag {
-        //         self.bids.insert(self.bids.len() - 1, trade.clone());
-        //     }
-        // }
-        return Ok();
+        return Ok(());
     }
 
     pub fn remove (&mut self, order_id: u32) {
@@ -134,6 +79,16 @@ impl OrderBook {
         self.book.remove(&order_id);
     }
 
+    // What can we really change here?
+    // Just the unit_price and qty?
+    //TODO is this insecure because we make qty & unit price modifiable??
+    pub fn modify (&mut self, trade_input: Trade) -> Result<T, E> {
+        //need to remove and add or just change and find new index
+        self.remove(trade_input.order_id.clone());
+        self.add(trade_input);
+
+        return Ok(());
+    }
     //Could create and return a spread struct that contains bid and ask, not sure about the best implimentation
     pub fn top (&self) -> (u32, u32) {
         let bid = self.bids[0].unit_price.clone();

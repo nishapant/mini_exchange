@@ -1,14 +1,6 @@
 #[readonly::make]
 #[derive(Clone)]
 pub struct Trade {
-    // Customer ID (a unique identifier for the market customer)
-    // Stock ID (usually the CUSIP number)
-    // Order type (buy/sell)
-    // Order class (market, limit, stop)
-    // Unit price (i.e., target price for a limit order)
-    // Number of shares (to be bought or sold)
-    // Partial fill allowed (for limit orders): 1 = partial fill allowed, 0 = no partial fill
-    // Expire time (time the order should be active in the market, in minutes)
     trader_id: u32,
     stock_id: u32, //we could leave this blank and assume that our exchange only trades one asset type
     #[readonly]

@@ -11,6 +11,8 @@ pub struct OrderBook {
 }
 
 impl OrderBook {
+    //cleanup all trades as the end of the day
+
     pub fn new(input: Trade) -> Self {
         Self {
             book: HashMap::new(),
@@ -20,11 +22,10 @@ impl OrderBook {
     }
 
 
-
     fn get_bid_insert_idx(mut vec: Vec<Trade>, trade: Trade) -> usize {
         for i in 0..vec.len() - 1 {
-            if vec[i].unit_price <= trade.unit_price && vec[i + 1].unit_price > trade.unit_price  {
-                return i+1;
+            if vec[i].unit_price <= trade.unit_price && vec[i + 1].unit_price > trade.unit_price {
+                return i + 1;
             }
         }
 
@@ -33,8 +34,8 @@ impl OrderBook {
 
     fn get_ask_insert_idx(mut vec: Vec<Trade>, trade: Trade) -> usize {
         for i in 0..vec.len() - 1 {
-            if vec[i].unit_price >= trade.unit_price && vec[i + 1].unit_price < trade.unit_price  {
-                return i+1;
+            if vec[i].unit_price >= trade.unit_price && vec[i + 1].unit_price < trade.unit_price {
+                return i + 1;
             }
         }
 
@@ -44,9 +45,9 @@ impl OrderBook {
 
     //needs testing xd!
     //TODO how do i declare the helper methods properly so that they can remain private?
-    pub fn add (&mut self, trade: Trade) -> Result<T, E> {
+    pub fn add(&mut self, trade: Trade) -> Result<T, E> {
         //insert into hashmap and then add to the appropriate array
-        self.book.insert(trade.order_id,trade);
+        self.book.insert(trade.order_id, trade);
         //true is bid(buyers) and false is ask(seller)
         if Trade.trade_type == true {
             self.bids.insert(self.get_bid_insert_idx(&self.bids, &trade), trade.clone());
@@ -57,7 +58,7 @@ impl OrderBook {
         return Ok(());
     }
 
-    pub fn remove (&mut self, order_id: u32) {
+    pub fn remove(&mut self, order_id: u32) {
         // query the hashmap get the Trade info
         let mut trade = self.book.get(&order_id).unwrap();
         //remove from the bid/ask vector
@@ -67,7 +68,6 @@ impl OrderBook {
                     self.bids.remove(i);
                 }
             }
-
         } else {
             for i in 0..self.asks.len() {
                 if order_id == trade.order_id {
@@ -82,7 +82,7 @@ impl OrderBook {
     // What can we really change here?
     // Just the unit_price and qty?
     //TODO is this insecure because we make qty & unit price modifiable??
-    pub fn modify (&mut self, trade_input: Trade) -> Result<T, E> {
+    pub fn modify(&mut self, trade_input: Trade) -> Result<T, E> {
         //need to remove and add or just change and find new index
         self.remove(trade_input.order_id.clone());
         self.add(trade_input);
@@ -90,10 +90,11 @@ impl OrderBook {
         return Ok(());
     }
     //Could create and return a spread struct that contains bid and ask, not sure about the best implimentation
-    pub fn top (&self) -> (u32, u32) {
+    pub fn top(&self) -> (u32, u32) {
         let bid = self.bids[0].unit_price.clone();
         let ask = self.asks[0].unit_price.clone();
         return (bid, ask);
     }
-}
+    }
+
 

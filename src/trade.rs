@@ -6,7 +6,7 @@ pub struct Trade {
     pub trade_type: bool, //buy or sell
     pub order_type: OrderType, //What type of order (market, limit, etc)
     pub unit_price: f64, //price of share
-    pub qty: u32, //number of the item they want to buy or sell 
+    pub qty: u32, //number of the item they want to buy or sell
     pub partial_fill: bool, //is partial fill of orders allowed or not
     pub expiration_date: u32, //immediate fill, end_of_day, 90 day? unsure what common types there are
 }

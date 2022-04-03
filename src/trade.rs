@@ -36,6 +36,11 @@ pub enum Outcome {
         time_stamp: SystemTime,
     },
 
+    Failed {
+        //TODO
+        //No match, duplicate, etc...
+    }, 
+
     Cancelled { 
          order_id: u64,
          ts: SystemTime,

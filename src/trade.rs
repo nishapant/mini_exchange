@@ -19,13 +19,7 @@ pub enum OrderType  {
 }
 
 #[derive(Debug, Clone)]
-pub enum Outcome  {
-    Accepted {
-        id: u64,
-        order_type: OrderType,
-        time_stamp: SystemTime,
-    },
-
+pub enum Outcome {
     Filled {
         order_id: u64,
         order_type: OrderType,

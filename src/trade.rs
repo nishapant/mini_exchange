@@ -18,35 +18,6 @@ pub enum OrderType  {
     Market
 }
 
-// #[derive(Debug, Clone)]
-// pub enum Outcome {
-//     Filled {
-//         order_id: u64,
-//         order_type: OrderType,
-//         unit_price: f64,
-//         qty: u32,
-//         time_stamp: SystemTime,
-//     },
-
-//     PartiallyFilled {
-//         order_id: u64,
-//         order_type: OrderType,
-//         unit_price: f64,
-//         qty: u32,
-//         time_stamp: SystemTime,
-//     },
-
-//     Failed {
-//         //TODO
-//         //No match, duplicate, etc...
-//     }, 
-
-//     Cancelled { 
-//          order_id: u64,
-//          ts: SystemTime,
-//     },
-// }
-
 #[derive(Debug, Clone)]
 pub struct OrderUpdate {
     order_id: u64,
@@ -58,8 +29,10 @@ pub struct OrderUpdate {
     status: Statuses
 }
 
-
 #[derive(Debug, Clone)]
 pub enum Statuses {
-    Filled, PartiallyFilled, Failed, Cancelled,
+    Filled, 
+    PartiallyFilled,
+    Failed,
+    Cancelled,
 }

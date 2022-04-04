@@ -7,7 +7,7 @@ pub struct Trade {
     pub order_id: u64, //number assigned by the gateway that is sent back to the trader and used to edit/cancel orders
     pub trade_type: bool, //buy or sell
     pub order_type: OrderType, //What type of order (market, limit, etc)
-    pub unit_price: f64, //price of share
+    pub unit_price: u64, //price of share in cents so we do not have to deal w super long decimals
     pub qty: u32, //number of the item they want to buy or sell
     pub partial_fill: bool, //is partial fill of orders allowed or not
     pub expiration_date: u32, //immediate fill, end_of_day, 90 day? unsure what common types there are

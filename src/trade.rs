@@ -5,7 +5,7 @@ pub struct Trade {
     pub trader_id: u32,
     pub stock_id: u32, //we could leave this blank and assume that our exchange only trades one asset type
     pub order_id: u64, //number assigned by the gateway that is sent back to the trader and used to edit/cancel orders
-    pub trade_type: bool, //buy or sell
+    pub trade_type: TradeType, //buy or sell
     pub order_type: OrderType, //What type of order (market, limit, etc)
     pub unit_price: u64, //price of share in cents so we do not have to deal w super long decimals
     pub qty: u32, //number of the item they want to buy or sell
@@ -19,30 +19,26 @@ pub enum OrderType  {
 }
 
 #[derive(Debug, Clone)]
-pub enum Outcome {
-    Filled {
-        order_id: u64,
-        order_type: OrderType,
-        unit_price: f64,
-        qty: u32,
-        time_stamp: SystemTime,
-    },
+pub enum TradeType  {
+    Buy, 
+    Sell
+}
 
-    PartiallyFilled {
-        order_id: u64,
-        order_type: OrderType,
-        unit_price: f64,
-        qty: u32,
-        time_stamp: SystemTime,
-    },
+#[derive(Debug, Clone)]
+pub struct OrderUpdate {
+    order_id: u64,
+    order_type: OrderType,
+    unit_price: f64,
+    qty: u32,
+    time_stamp: SystemTime,
+    extradata: u32,
+    status: Statuses
+}
 
-    Failed {
-        //TODO
-        //No match, duplicate, etc...
-    }, 
-
-    Cancelled { 
-         order_id: u64,
-         ts: SystemTime,
-    },
+#[derive(Debug, Clone)]
+pub enum Statuses {
+    Filled, 
+    PartiallyFilled,
+    Failed,
+    Cancelled,
 }

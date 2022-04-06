@@ -1,9 +1,9 @@
 use std::time::SystemTime;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Trade {
-    pub trader_id: u32,
-    pub stock_id: u32, //we could leave this blank and assume that our exchange only trades one asset type
+    pub trader_id: u8,
+    pub stock_id: u16, //we could leave this blank and assume that our exchange only trades one asset type
     pub order_id: u64, //number assigned by the gateway that is sent back to the trader and used to edit/cancel orders
     pub trade_type: TradeType, //buy or sell
     pub order_type: OrderType, //What type of order (market, limit, etc)
@@ -13,18 +13,18 @@ pub struct Trade {
     pub expiration_date: u32, //immediate fill, end_of_day, 90 day? unsure what common types there are
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum OrderType  {
     Market
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum TradeType  {
     Buy, 
     Sell
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct OrderUpdate {
     order_id: u64,
     order_type: OrderType,
@@ -32,13 +32,6 @@ pub struct OrderUpdate {
     qty: u32,
     time_stamp: SystemTime,
     extradata: u32,
-    status: Statuses
+    status: Status
 }
 
-#[derive(Debug, Clone)]
-pub enum Statuses {
-    Filled, 
-    PartiallyFilled,
-    Failed,
-    Cancelled,
-}

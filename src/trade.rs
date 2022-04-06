@@ -13,12 +13,12 @@ pub struct Trade {
     pub expiration_date: u32, //immediate fill, end_of_day, 90 day? unsure what common types there are
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OrderType  {
     Market
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TradeType  {
     Buy, 
     Sell
@@ -35,3 +35,10 @@ pub struct OrderUpdate {
     status: Status
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum Status {
+    Filled,
+    PartiallyFilled,
+    Failed,
+    Cancelled,
+}

@@ -23,6 +23,9 @@ In addition, we would also write a basic test app harnesses, which would make mu
 - Data should be updated every “tick” OR event-driven from the OME
 - Data should be available to everyone at the same time
 - Will also send a copy to the dropcopy
+###ESB
+- Handle communication between all of the internal components of the system, so each only needs to burden itself with a single TCP connection
+- Receive messages from each component and redirect them to the appropriate component
 ### Dropcopy
 - Real time reports of what trades are being executed, aggregated by the entity who owns multiple trading clients
 - Receives data from ticker plant, aggregates, and distributes out

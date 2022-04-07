@@ -107,7 +107,7 @@ Vagrant.configure("2") do |config|
     tcp2.vm.network "private_network", ip: "192.168.50.102", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp3" do |tcp2|
+  config.vm.define "tcp3" do |tcp3|
       tcp2.vm.hostname = "tcp3"
 
       tcp2.vm.provider :virtualbox do |vb|
@@ -118,7 +118,7 @@ Vagrant.configure("2") do |config|
       tcp2.vm.network "private_network", ip: "192.168.50.103", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp4" do |tcp2|
+  config.vm.define "tcp4" do |tcp4|
         tcp2.vm.hostname = "tcp4"
 
         tcp2.vm.provider :virtualbox do |vb|
@@ -130,7 +130,7 @@ Vagrant.configure("2") do |config|
     end
 
 
-  config.vm.define "tcp5" do |tcp2|
+  config.vm.define "tcp5" do |tcp5|
           tcp2.vm.hostname = "tcp5"
 
           tcp2.vm.provider :virtualbox do |vb|
@@ -141,7 +141,7 @@ Vagrant.configure("2") do |config|
           tcp2.vm.network "private_network", ip: "192.168.50.105", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp6" do |tcp2|
+  config.vm.define "tcp6" do |tcp6|
           tcp2.vm.hostname = "tcp6"
 
           tcp2.vm.provider :virtualbox do |vb|
@@ -152,7 +152,7 @@ Vagrant.configure("2") do |config|
           tcp2.vm.network "private_network", ip: "192.168.50.106", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp7" do |tcp2|
+  config.vm.define "tcp7" do |tcp7|
           tcp2.vm.hostname = "tcp7"
 
           tcp2.vm.provider :virtualbox do |vb|

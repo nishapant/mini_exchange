@@ -5,8 +5,8 @@ use crate::trade::TradeType::Buy;
 
 
 pub struct OrderBook {
-    book: HashMap<u64, Trade>,
-    //order_id, Trade
+    book: HashMap<u64, Trade>, //order_id, Trade
+
     //https://stackoverflow.com/questions/28656387/initialize-a-large-fixed-size-array-with-non-copy-types
     prices: [Option<LinkedList<Trade>>; 18446744073709551615],
     //index is price, LL is trades at that price

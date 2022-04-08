@@ -83,8 +83,8 @@ Vagrant.configure("2") do |config|
 
 
   
-  config.vm.define "tcp1" do |tcp1|
-    tcp1.vm.hostname = "tcp1"
+  config.vm.define "ome" do |tcp1|
+    tcp1.vm.hostname = "ome"
     
     tcp1.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -96,8 +96,8 @@ Vagrant.configure("2") do |config|
     tcp1.vm.provision "shell", path: "provision_script/install_sfnettest.sh" #what does this line do?
   end
 
-  config.vm.define "tcp2" do |tcp2|
-    tcp2.vm.hostname = "tcp2"
+  config.vm.define "esb" do |tcp2|
+    tcp2.vm.hostname = "esb"
     
     tcp2.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -107,8 +107,8 @@ Vagrant.configure("2") do |config|
     tcp2.vm.network "private_network", ip: "192.168.50.102", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp3" do |tcp3|
-      tcp3.vm.hostname = "tcp3"
+  config.vm.define "dropcopy" do |tcp3|
+      tcp3.vm.hostname = "dropcopy"
 
       tcp3.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -118,8 +118,8 @@ Vagrant.configure("2") do |config|
       tcp3.vm.network "private_network", ip: "192.168.50.103", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp4" do |tcp4|
-        tcp4.vm.hostname = "tcp4"
+  config.vm.define "tickerplant" do |tcp4|
+        tcp4.vm.hostname = "tickerplant"
 
         tcp4.vm.provider :virtualbox do |vb|
           vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -130,8 +130,8 @@ Vagrant.configure("2") do |config|
     end
 
 
-  config.vm.define "tcp5" do |tcp5|
-          tcp5.vm.hostname = "tcp5"
+  config.vm.define "gateway" do |tcp5|
+          tcp5.vm.hostname = "gateway"
 
           tcp5.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -141,8 +141,8 @@ Vagrant.configure("2") do |config|
           tcp5.vm.network "private_network", ip: "192.168.50.105", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp6" do |tcp6|
-          tcp6.vm.hostname = "tcp6"
+  config.vm.define "trader1" do |tcp6|
+          tcp6.vm.hostname = "trader1"
 
           tcp6.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -152,8 +152,8 @@ Vagrant.configure("2") do |config|
           tcp6.vm.network "private_network", ip: "192.168.50.106", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   end
 
-  config.vm.define "tcp7" do |tcp7|
-          tcp7.vm.hostname = "tcp7"
+  config.vm.define "trader2" do |tcp7|
+          tcp7.vm.hostname = "trader2"
 
           tcp7.vm.provider :virtualbox do |vb|
             vb.customize ["modifyvm", :id, "--memory", "256"]
@@ -167,4 +167,3 @@ Vagrant.configure("2") do |config|
 
 
 end
-

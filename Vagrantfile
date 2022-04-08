@@ -93,7 +93,7 @@ Vagrant.configure("2") do |config|
   
     tcp1.vm.network "private_network", ip: "192.168.50.101", virtualbox__intnet: "tcp_network", nic_type: "virtio"
   
-    tcp1.vm.provision "shell", path: "provision_scripts/install_sfnettest.sh" #what does this line do?
+    tcp1.vm.provision "shell", path: "provision_script/install_sfnettest.sh" #what does this line do?
   end
 
   config.vm.define "tcp2" do |tcp2|

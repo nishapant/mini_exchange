@@ -11,35 +11,9 @@ use serde::{Serialize, Deserialize};
 
 
 fn main() {
-    match TcpStream::connect("localhost:8881") {
-        Ok(mut stream) => {
-            println!("Successfully connected to server in port 8881");
+    // create a handle connection thread for every entity
 
-            let msg = b"Hello!";
-
-            stream.write(msg).unwrap();
-            println!("Sent Hello, awaiting reply...");
-
-            let mut data = [0 as u8; 6]; // using 6 byte buffer
-            match stream.read_exact(&mut data) {
-                Ok(_) => {
-                    if &data == msg {
-                        println!("Reply is ok!");
-                    } else {
-                        let text = from_utf8(&data).unwrap();
-                        println!("Unexpected reply: {}", text);
-                    }
-                },
-                Err(e) => {
-                    println!("Failed to receive data: {}", e);
-                }
-            }
-        },
-        Err(e) => {
-            println!("Failed to connect: {}", e);
-        }
-    }
-    println!("Terminated.");
+    handle_connection("localhost", 8881);
 
     thread::spawn(|| {
 
@@ -47,12 +21,13 @@ fn main() {
         // in its own separate thread
         println!("hello");
         for i in 0..5 {
-
             println!("Loop 2 iteration: {}", i);
             thread::sleep(Duration::from_millis(500));
         }
     });
 
+    // need to wait for the thread to finish otherwise once the main thread dies then all other threads will die
+    // this will be in an infinite loop anyways so this won't be an issue
     thread::sleep(Duration::from_millis(3000));
     println!("main thread waited")
 }
@@ -66,24 +41,25 @@ fn handle_connection(tcp_host: &str, tcp_port: i32) {
         Ok(mut stream) => {
             // the connection was successful
             println!("Successfully connected to {}:{}", tcp_host, tcp_port);
+            while true {
+                let msg = b"Hello!";
 
-            let msg = b"Hello!";
-
-            stream.write(msg).unwrap();
-            println!("Sent Hello, awaiting reply...");
-
-            let mut data = [0 as u8; 6]; // using 6 byte buffer
-            match stream.read_exact(&mut data) {
-                Ok(_) => {
-                    if &data == msg {
-                        println!("Reply is ok!");
-                    } else {
-                        let text = from_utf8(&data).unwrap();
-                        println!("Unexpected reply: {}", text);
+                stream.write(msg).unwrap();
+                println!("Sent Hello, awaiting reply...");
+    
+                let mut data = [0 as u8; 6]; // using 6 byte buffer
+                match stream.read_exact(&mut data) {
+                    Ok(_) => {
+                        if &data == msg {
+                            println!("Reply is ok!");
+                        } else {
+                            let text = from_utf8(&data).unwrap();
+                            println!("Unexpected reply: {}", text);
+                        }
+                    },
+                    Err(e) => {
+                        println!("Failed to receive data: {}", e);
                     }
-                },
-                Err(e) => {
-                    println!("Failed to receive data: {}", e);
                 }
             }
         },

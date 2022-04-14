@@ -119,7 +119,7 @@ impl OrderBook {
     // }
 
     //TODO create another function that routes to add/modify/match based on order type
-    //Enforce that this and maybe "fn top" are the only point of interaction w the order book
+    //Enforce upthat this and maybe "fn top" are the only point of interaction w the order book
     //pub fn route() {
         //if the order id already exists then send it to modify?
         //if its a market order then match regardless of price
@@ -211,6 +211,23 @@ mod tests {
         assert_eq!(book.book.len(), 1);
         assert_eq!(book.prices[rand_trade.unit_price as usize].as_mut().unwrap().len(), 0);
         assert_eq!(book.prices[second_trade.unit_price as usize].as_mut().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn single_modify_zero_success() {
+        let mut book = OrderBook::new();
+        let mut rand_trade = OrderBook::generate_random_trade();
+        book.insert(rand_trade);
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[rand_trade.unit_price as usize].as_ref().unwrap().len(), 1);
+
+        let mut second_trade = OrderBook::generate_random_trade();
+        second_trade.order_id = rand_trade.order_id;
+        second_trade.unit_price = 0;
+        book.modify(rand_trade.order_id, second_trade);
+        assert_eq!(book.book.len(), 0);
+        assert_eq!(book.prices[rand_trade.unit_price as usize].as_mut().unwrap().len(), 0);
+        assert_eq!(book.prices[second_trade.unit_price as usize].as_mut().unwrap().len(), 0);
     }
 
 }

@@ -15,7 +15,8 @@ pub struct Trade {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum OrderType  {
-    Market
+    Market,
+    Limit,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

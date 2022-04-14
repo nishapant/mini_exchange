@@ -68,11 +68,15 @@ impl OrderBook {
 
 
     pub fn modify(&mut self, order_id: u64, trade_input: Trade) {
-        if (trade_input.order_id != order_id) {
+        if trade_input.order_id != order_id {
             return; //modify fails
         }
-        self.remove(order_id);
-        self.insert(trade_input);
+        if trade_input.unit_price == 0  {
+            self.remove(order_id);
+        } else {
+            self.remove(order_id);
+            self.insert(trade_input);
+        }
     }
 
     // //Could create and return a spread struct that contains bid and ask, not sure about the best implementation
@@ -81,12 +85,9 @@ impl OrderBook {
     }
 
     //TODO match function -> should call add and remove appropriately
-    //am currently assuming that everyhting is parital fill
+    //am currently assuming that everything is partial fill
     // pub fn matching(&mut self, &mut incoming_trade: Trade) {
     //     if incoming_trade.trade_type == Buy { // if its a buy order
-    //         // if incoming_trade.unit_price < self.ask_min { //if the buy price is less than the sellers min
-    //         //     self.insert(incoming_trade);
-    //         // }
     //         let mut to_remove: Vec<Trade> = Vec::new();
     //         for linked_list in self.prices[self.ask_min].as_mut().unwrap()..pricesself.prices[self.bid_max].as_mut().unwrap() {
     //             for current_trade in linked_list.iter_mut() {
@@ -119,6 +120,14 @@ impl OrderBook {
 
     //TODO create another function that routes to add/modify/match based on order type
     //Enforce that this and maybe "fn top" are the only point of interaction w the order book
+    //pub fn route() {
+        //if the order id already exists then send it to modify?
+        //if its a market order then match regardless of price
+        //else if its a limit order then try matching with given price
+            //if its too large or small then don't try matching and just insert
+
+    //}
+
 
     #[cfg(any(test, test_utilities))]
     pub fn generate_random_trade() -> Trade {

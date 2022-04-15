@@ -1,6 +1,6 @@
 use std::collections::{HashMap, LinkedList};
 use crate::trade::{Trade, TradeType};
-use crate::trade::OrderType::Market;
+use crate::trade::OrderType::{Limit, Market};
 use crate::trade::TradeType::{Buy, Sell};
 use rand::Rng;
 
@@ -9,13 +9,12 @@ pub struct OrderBook {
     pub book: HashMap<u64, Trade>, //order_id, Trade
 
     //https://stackoverflow.com/questions/28656387/initialize-a-large-fixed-size-array-with-non-copy-types
-    pub prices: [Option<LinkedList<Trade>>; 256],
     //index is price, LL is trades at that price
-    bid_max: u8,
-    //first number is the price, second is the index in the linked list
-    ask_min: u8,
+    pub prices: [Option<LinkedList<Trade>>; 256],
     //bids- people who are buying -> should be least to greatest
+    bid_max: u8,
     //asks- people who are selling -> should be greatest to least
+    ask_min: u8,
 }
 
 
@@ -89,7 +88,7 @@ impl OrderBook {
     // pub fn matching(&mut self, &mut incoming_trade: Trade) {
     //     if incoming_trade.trade_type == Buy { // if its a buy order
     //         let mut to_remove: Vec<Trade> = Vec::new();
-    //         for linked_list in self.prices[self.ask_min].as_mut().unwrap()..pricesself.prices[self.bid_max].as_mut().unwrap() {
+    //         for linked_list in self.prices[self.ask_min].as_mut().unwrap()..self.prices[self.bid_max].as_mut().unwrap() {
     //             for current_trade in linked_list.iter_mut() {
     //                 if current_trade.trade_type == Sell {
     //                     if incoming_trade.qty > current_trade.qty {
@@ -119,9 +118,10 @@ impl OrderBook {
     // }
 
     //TODO create another function that routes to add/modify/match based on order type
-    //Enforce upthat this and maybe "fn top" are the only point of interaction w the order book
+    //Enforce that route and maybe "fn top" are the only point of interaction w the order book
     //pub fn route() {
         //if the order id already exists then send it to modify?
+            //if they want to cancel the order they can just set the price = 0
         //if its a market order then match regardless of price
         //else if its a limit order then try matching with given price
             //if its too large or small then don't try matching and just insert
@@ -149,6 +149,40 @@ impl OrderBook {
             qty: rng.gen::<u32>(), //number of the item they want to buy or sell
             partial_fill: true, //is partial fill of orders allowed or not
             expiration_date: rng.gen::<u32>(), //immediate fill, end_of_day, 90 day? unsure what common types there are
+        }
+    }
+
+    #[cfg(any(test, test_utilities))]
+    pub fn generate_random_market(input_trade_type: TradeType) -> Trade {
+        let mut rng = rand::thread_rng();
+        let num = rng.gen::<u8>();
+        Trade {
+            trader_id: rng.gen::<u8>(),
+            stock_id: rng.gen::<u16>(),
+            order_id: rng.gen::<u64>(),
+            trade_type: input_trade_type,
+            order_type: Market,
+            unit_price: rng.gen::<u8>(),
+            qty: rng.gen::<u32>(),
+            partial_fill: true,
+            expiration_date: rng.gen::<u32>(),
+        }
+    }
+
+    #[cfg(any(test, test_utilities))]
+    pub fn generate_random_limit(input_trade_type: TradeType) -> Trade {
+        let mut rng = rand::thread_rng();
+        let num = rng.gen::<u8>();
+        Trade {
+            trader_id: rng.gen::<u8>(),
+            stock_id: rng.gen::<u16>(),
+            order_id: rng.gen::<u64>(),
+            trade_type: input_trade_type,
+            order_type: Limit,
+            unit_price: rng.gen::<u8>(),
+            qty: rng.gen::<u32>(),
+            partial_fill: true,
+            expiration_date: rng.gen::<u32>(),
         }
     }
 }
@@ -230,5 +264,11 @@ mod tests {
         assert_eq!(book.prices[second_trade.unit_price as usize].as_mut().unwrap().len(), 0);
     }
 
+
+    //Tests for Matching engine
+    //Market Buy
+    //Market Sell
+    //Limit Buy -> fail, success (test success w sparse and full)
+    //Limit Sell -> fail, success (test success w sparse and full)
 }
 

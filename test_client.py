@@ -22,9 +22,10 @@ try:
         while 1:
             receivedData = newSocket.recv(1024)
             if not receivedData: break
+            print(receivedData)
             # Echo back the same data you just received
             newSocket.send(receivedData)
-        newSocket.close(  )
-        print("Disconnected from", address)
+        # newSocket.close(  )
+        # print("Disconnected from", address)
 finally:
     sock.close()

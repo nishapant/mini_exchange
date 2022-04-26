@@ -17,11 +17,12 @@ struct JobStatus {
 }
 
 fn main() {
-
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);
     let (client_sender, client_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
-
+    let (matching_engine_sender, matching_engine_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
+    let (dropcopy_sender, dropcopy_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
+    let (tickerplant_sender, tickerplant_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
 
     thread::spawn(|| handle_tcp_connection("localhost", 8881, client_receiver));
 
@@ -29,8 +30,12 @@ fn main() {
         // threads can add stuff to channel that needs to be sent across 
         let thread_client_sender = client_sender.clone();
         thread_client_sender.send("hello").unwrap();
+        thread::sleep(Duration::from_millis(200));
+
         let msg = "loop iteration";
         thread_client_sender.send(msg).unwrap();
+        thread::sleep(Duration::from_millis(200));
+
         let msg = "this is the third messages";
         thread_client_sender.send(msg).unwrap();
         for i in 0..5 {
@@ -70,34 +75,46 @@ fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&s
     match TcpStream::connect(connection_string) {
         Ok(mut stream) => {
             // the connection was successful
+            stream.set_nonblocking(true).expect("set to non-blocking");
             println!("successfully connected to {}:{}", tcp_host, tcp_port);
             loop {
                 let d = Duration::from_millis(10);
                 // check channel to see if theres something that needs to be sent to client
                 let new_msg = msg_channel.recv_timeout(d);
+                // println!("checking channel");
                 if  new_msg.is_ok() {
+                    // println!("message is ok");
                     // send the message back to the client
                     stream.write(new_msg.ok().unwrap().as_bytes()).unwrap();
                     println!("sent message: {}", new_msg.ok().unwrap());
                 }
-    
-                let mut data = [0 as u8; 256]; // using 256 byte buffer
+                
+                // println!("receiving message");
+
+                let mut data = [0 as u8; 512]; // using 256 byte buffer
+
                 match stream.read(&mut data) {
                     Ok(_) => {
                         println!("recevied data: {}", str::from_utf8(&data).unwrap());
                     },
                     Err(e) => {
                         // error 
+                        // println!("there was an error reading");
+                        // continue;
                     }
                 }
             }
         },
 
         Err(e) => {
-            println!("Failed to connect: {}", e);
+            println!("failed to connect: {}", e);
         }
-
     }
+    println!("reached the end of the method");
+}
+
+fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>())
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

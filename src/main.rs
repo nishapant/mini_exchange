@@ -10,5 +10,6 @@ fn main() {
     let input = &args[1];
     if input == "1" || input == "ome" {
         //run ome
+        println!("hi");
     }
 }

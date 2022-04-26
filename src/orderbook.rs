@@ -181,7 +181,7 @@ impl OrderBook {
 
         for trade in &orders_filled {
             if trade.qty == 0 {
-                // println!("SIZE IS {}", orders_filled.len());
+                println!("SIZE IS {}", orders_filled.len());
                 self.remove(trade.order_id);
             }
         }
@@ -374,6 +374,21 @@ mod tests {
         assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 0);
     }
 
+    #[test]
+    #[ntest::timeout(1000)]
+    fn limit_sell_equal_qty() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.unit_price = buy_trade.unit_price;
+        sell_trade.qty = buy_trade.qty;
+
+        book.insert(buy_trade);
+        book.matching(&mut sell_trade); //test return values?
+
+        assert_eq!(book.book.len(), 0);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 0);
+    }
 
     #[test]
     #[ntest::timeout(1000)]
@@ -391,7 +406,21 @@ mod tests {
         assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 0);
     }
 
+    #[test]
+    #[ntest::timeout(1000)]
+    fn limit_sell_equal_qty_sparse() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.qty = buy_trade.qty;
+        sell_trade.unit_price = buy_trade.unit_price - 10000000;
 
+        book.insert(buy_trade);
+        book.matching(&mut sell_trade); //test return values?
+
+        assert_eq!(book.book.len(), 0);
+        assert_eq!(book.prices[&buy_trade.unit_price].as_ref().unwrap().len(), 0);
+    }
 
     #[test]
     #[ntest::timeout(1000)]
@@ -411,12 +440,29 @@ mod tests {
 
     #[test]
     #[ntest::timeout(1000)]
+    fn limit_sell_unequal_qty() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.qty = buy_trade.qty + 1;
+        sell_trade.unit_price = buy_trade.unit_price;
+
+        book.insert(buy_trade);
+        book.matching(&mut sell_trade); //test return values?
+
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[&buy_trade.unit_price].as_ref().unwrap().len(), 1);
+    }
+
+
+    #[test]
+    #[ntest::timeout(1000)]
     fn limit_buy_unequal_seller_sparse() {
         let mut book = OrderBook::new();
         let mut sell_trade = OrderBook::generate_random_limit(Sell);
         let mut buy_trade = OrderBook::generate_random_limit(Buy);
         sell_trade.qty = buy_trade.qty + 1;
-        sell_trade.unit_price = buy_trade.unit_price - 1000000000;
+        sell_trade.unit_price = buy_trade.unit_price - 100000000;
 
         book.insert(sell_trade);
         book.matching(&mut buy_trade); //test return values?
@@ -428,12 +474,29 @@ mod tests {
 
     #[test]
     #[ntest::timeout(10000)]
+    fn limit_sell_unequal_seller_qty() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        buy_trade.qty = sell_trade.qty + 1;
+        sell_trade.unit_price = buy_trade.unit_price - 100000;
+
+        book.insert(buy_trade);
+        book.matching(&mut sell_trade); //test return values?
+
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[&buy_trade.unit_price].as_ref().unwrap().len(), 1);
+        assert_false!(book.prices.contains_key(&sell_trade.unit_price));
+    }
+
+    #[test]
+    #[ntest::timeout(10000)]
     fn limit_buy_unequal_buyer_sparse() {
         let mut book = OrderBook::new();
         let mut sell_trade = OrderBook::generate_random_limit(Sell);
         let mut buy_trade = OrderBook::generate_random_limit(Buy);
         sell_trade.qty = buy_trade.qty - 1;
-        sell_trade.unit_price = buy_trade.unit_price - 10000000;
+        sell_trade.unit_price = buy_trade.unit_price - 1000000;
         book.insert(sell_trade);
         book.matching(&mut buy_trade); //test return values?
         assert_eq!(book.book.len(), 1);
@@ -441,6 +504,21 @@ mod tests {
         assert_eq!(book.prices[&buy_trade.unit_price].as_ref().unwrap().len(), 1);
     }
 
+    #[test]
+    #[ntest::timeout(10000)]
+    fn limit_sell_unequal_buyer_qty() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        buy_trade.qty = sell_trade.qty - 1;
+        sell_trade.unit_price = buy_trade.unit_price - 100000;
 
+        book.insert(buy_trade);
+        book.matching(&mut sell_trade); //test return values?
+
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[&buy_trade.unit_price].as_ref().unwrap().len(), 0);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 1);
+    }
 }
 

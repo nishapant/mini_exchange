@@ -46,22 +46,6 @@ impl OrderBook {
         //remove from price linked list
         //clone the list,modify the clone,  remove map entry, insert new one
         //modify bid_max and ask_mint
-        // let mut trade = self.book[&order_id];
-        // if trade.trade_type == Buy && trade.unit_price == bid_max { //the trade being removed is the bid max
-        //     let mut list = self.prices[&self.book[&order_id].unit_price].as_ref().unwrap().clone();
-        //     let mut i = 0;
-        //     for element in list.iter_mut() {
-        //         if trade.trade_type == Buy  {
-        //             //let mut prev = list.prev();
-        //
-        //             break;
-        //         }
-        //         i += 1;
-        //     }
-        //     bid_max = trade.unit_price;
-        // } else if trade.trade_type == Sell && trade.unit_price == ask_min {
-        //     ask_min = trade.unit_price;
-        // }
 
         //let mut list = self.prices[&self.book[&order_id].unit_price].as_ref().unwrap().clone();
         let mut list = self.prices.get_mut(&self.book[&order_id].unit_price).unwrap().as_mut().unwrap();

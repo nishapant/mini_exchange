@@ -4,6 +4,8 @@ use crate::trade::{OrderUpdate, Trade, TradeType};
 use crate::trade::OrderType::{Limit, Market};
 use crate::trade::TradeType::{Buy, Sell};
 use rand::Rng;
+use ntest::timeout;
+
 
 //TODO make book and prices only visible for tests
 pub struct OrderBook {
@@ -33,8 +35,8 @@ impl OrderBook {
         Self {
             book: HashMap::new(),
             prices: HashMap::new(),
-            bid_max: u64::MAX,
-            ask_min: u64::MIN,
+            bid_max: u64::MIN,
+            ask_min: u64::MAX,
         }
     }
 
@@ -113,72 +115,98 @@ impl OrderBook {
         return (self.bid_max, self.ask_min);
     }
 
+
     //TODO match function -> should call add and remove appropriately
     //am currently assuming that everything is partial fill
-    pub fn limit_order_match(&mut self, mut incoming_trade: &mut Trade) -> Option<(Trade, Vec<Trade>)> {
+    pub fn matching(&mut self, mut incoming_trade: &mut Trade) -> (Trade, Vec<Trade>) {
         let mut orders_filled: Vec<Trade> = Vec::new(); //remember that the last trade in this list might not be fully filled
         if incoming_trade.trade_type == Buy { // if its a buy order
+            // println!("2");
             if incoming_trade.unit_price >= self.ask_min { //start at minimum and keep going until order is filled
+                // println!("3");
                 let mut price = self.ask_min;
-                while price <= incoming_trade.unit_price {
-                    let mut linked_list = self.prices.get_mut(&price).unwrap().as_mut().unwrap();
-                    for current_trade in linked_list.iter_mut() {
-                        if current_trade.trade_type == Sell {
-                            if incoming_trade.qty > current_trade.qty {
-                                incoming_trade.qty = incoming_trade.qty - current_trade.qty;
-                                current_trade.qty = 0;
-                                orders_filled.push(current_trade.clone());
-                            } else if current_trade.qty >= incoming_trade.qty {
-                                incoming_trade.qty = 0;
-                                current_trade.qty = current_trade.qty - incoming_trade.qty;
-                                orders_filled.push(current_trade.clone());
-                                break;
+                while price <= incoming_trade.unit_price || (incoming_trade.order_type == Market && price < u64::MAX) {
+                    if self.prices.contains_key(&price) && self.prices.get_mut(&price).is_some() {
+                        let mut linked_list = self.prices.get_mut(&price).unwrap().as_mut().unwrap();
+                        for current_trade in linked_list.iter_mut() {
+                            if current_trade.trade_type == Sell {
+                                if incoming_trade.qty > current_trade.qty {
+                                    incoming_trade.qty = incoming_trade.qty - current_trade.qty;
+                                    current_trade.qty = 0;
+                                    orders_filled.push(current_trade.clone());
+                                } else if current_trade.qty >= incoming_trade.qty {
+                                    current_trade.qty = current_trade.qty - incoming_trade.qty;
+                                    incoming_trade.qty = 0;
+                                    orders_filled.push(current_trade.clone());
+                                    break;
+                                }
                             }
                         }
                     }
                     if incoming_trade.qty == 0 {
                         break;
                     }
+                    price += 1;
+                }
+            }
+        } else { // its a sell order
+            // println!("NEIN");
+            if incoming_trade.unit_price <= self.bid_max { //start at max and keep going down until order is filled
+                let mut price = self.bid_max;
+                while price >= incoming_trade.unit_price || (incoming_trade.order_type == Market && price > u64::MIN) {
+                    if self.prices.contains_key(&price) && self.prices.get_mut(&price).is_some() {
+                        let mut linked_list = self.prices.get_mut(&price).unwrap().as_mut().unwrap();
+                        for current_trade in linked_list.iter_mut() {
+                            if current_trade.trade_type == Buy {
+                                if incoming_trade.qty > current_trade.qty {
+                                    incoming_trade.qty = incoming_trade.qty - current_trade.qty;
+                                    current_trade.qty = 0;
+                                    orders_filled.push(current_trade.clone());
+                                } else if current_trade.qty >= incoming_trade.qty {
+                                    current_trade.qty = current_trade.qty - incoming_trade.qty;
+                                    incoming_trade.qty = 0;
+                                    orders_filled.push(current_trade.clone());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if incoming_trade.qty == 0 {
+                        break;
+                    }
+                    price -= 1;
                 }
             }
         }
 
-
-
         for trade in &orders_filled {
             if trade.qty == 0 {
+                // println!("SIZE IS {}", orders_filled.len());
                 self.remove(trade.order_id);
             }
         }
-        if incoming_trade.qty > 0 {
+        if incoming_trade.qty > 0 && incoming_trade.order_type == Limit {
             self.insert(incoming_trade.clone());
-        } else {
-            return Some((incoming_trade.clone(), orders_filled));
         }
+        //make sure return values are correct
+        return (incoming_trade.clone(), orders_filled);
 
-
-
-        return None;
-            //in the case buy is greater than all of the available sells add the remaining buy to the orderbook
-
-
-            //remove all of the trades as needed.
-            //return partially filled, filled, and status or current trade
-
-        // else { //if its a sell order
-        // }
     }
 
     //TODO create another function that routes to add/modify/match based on order type
     //Enforce that route and maybe "fn top" are the only point of interaction w the order book
-    //pub fn route() {
-        //if the order id already exists then send it to modify?
-            //if they want to cancel the order they can just set the price = 0
-        //if its a market order then match regardless of price
-        //else if its a limit order then try matching with given price
-            //if its too large or small then don't try matching and just insert
-
-    //}
+    pub fn route(&mut self, incoming_trade: Trade) {
+    //if the order id already exists then send it to modify or cancel??????
+        if self.book.contains_key(&incoming_trade.order_id) && self.book[&incoming_trade.order_id].trader_id == incoming_trade.trader_id  {
+            if incoming_trade.unit_price == 0 { //cancel if the price is 0
+                self.remove(incoming_trade.order_id);
+            } else { //otherwise modify
+                self.modify(incoming_trade.order_id, incoming_trade);
+            }
+        } else {
+            self.matching(&mut incoming_trade.clone());
+        }
+    }
 
 
     #[cfg(any(test, test_utilities))]
@@ -241,8 +269,10 @@ impl OrderBook {
 
 #[cfg(test)]
 mod tests {
+    use ntest::assert_false;
     use crate::orderbook::OrderBook;
     use crate::trade;
+    use crate::trade::TradeType::{Buy, Sell};
 
     #[test]
     fn single_insert() {
@@ -327,7 +357,90 @@ mod tests {
     //Limit Sell -> fail, success (test success w sparse and full)
     //everytime bid ask spread is changed send to ticket book
     //dropcopy and gateway would get cancelled and modified trades.
-    //
+
+    #[test]
+    #[ntest::timeout(1000)]
+    fn limit_buy_equal_qty() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.unit_price = buy_trade.unit_price;
+        sell_trade.qty = buy_trade.qty;
+
+        book.insert(sell_trade);
+        book.matching(&mut buy_trade); //test return values?
+
+        assert_eq!(book.book.len(), 0);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 0);
+    }
+
+
+    #[test]
+    #[ntest::timeout(1000)]
+    fn limit_buy_equal_qty_sparse() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.qty = buy_trade.qty;
+        sell_trade.unit_price = buy_trade.unit_price - 1000000000;
+
+        book.insert(sell_trade);
+        book.matching(&mut buy_trade); //test return values?
+
+        assert_eq!(book.book.len(), 0);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 0);
+    }
+
+
+
+    #[test]
+    #[ntest::timeout(1000)]
+    fn limit_buy_unequal_qty() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.qty = buy_trade.qty + 1;
+        sell_trade.unit_price = buy_trade.unit_price;
+
+        book.insert(sell_trade);
+        book.matching(&mut buy_trade); //test return values?
+
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 1);
+    }
+
+    #[test]
+    #[ntest::timeout(1000)]
+    fn limit_buy_unequal_seller_sparse() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.qty = buy_trade.qty + 1;
+        sell_trade.unit_price = buy_trade.unit_price - 1000000000;
+
+        book.insert(sell_trade);
+        book.matching(&mut buy_trade); //test return values?
+
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 1);
+        assert_false!(book.prices.contains_key(&buy_trade.unit_price));
+    }
+
+    #[test]
+    #[ntest::timeout(10000)]
+    fn limit_buy_unequal_buyer_sparse() {
+        let mut book = OrderBook::new();
+        let mut sell_trade = OrderBook::generate_random_limit(Sell);
+        let mut buy_trade = OrderBook::generate_random_limit(Buy);
+        sell_trade.qty = buy_trade.qty - 1;
+        sell_trade.unit_price = buy_trade.unit_price - 10000000;
+        book.insert(sell_trade);
+        book.matching(&mut buy_trade); //test return values?
+        assert_eq!(book.book.len(), 1);
+        assert_eq!(book.prices[&sell_trade.unit_price].as_ref().unwrap().len(), 0);
+        assert_eq!(book.prices[&buy_trade.unit_price].as_ref().unwrap().len(), 1);
+    }
+
 
 }
 

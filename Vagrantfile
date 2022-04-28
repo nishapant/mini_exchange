@@ -167,3 +167,64 @@ Vagrant.configure("2") do |config|
 
 
 end
+
+  config.vm.define "dropcopy" do |tcp3|
+      tcp3.vm.hostname = "dropcopy"
+
+      tcp3.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "256"]
+        vb.customize ["modifyvm", :id, "--cpus", "2"]
+      end
+
+      tcp3.vm.network "private_network", ip: "192.168.50.103", virtualbox__intnet: "tcp_network", nic_type: "virtio"
+  end
+
+  config.vm.define "tickerplant" do |tcp4|
+        tcp4.vm.hostname = "tickerplant"
+
+        tcp4.vm.provider :virtualbox do |vb|
+          vb.customize ["modifyvm", :id, "--memory", "256"]
+          vb.customize ["modifyvm", :id, "--cpus", "2"]
+        end
+
+        tcp4.vm.network "private_network", ip: "192.168.50.104", virtualbox__intnet: "tcp_network", nic_type: "virtio"
+    end
+
+
+  config.vm.define "gateway" do |tcp5|
+          tcp5.vm.hostname = "gateway"
+
+          tcp5.vm.provider :virtualbox do |vb|
+            vb.customize ["modifyvm", :id, "--memory", "256"]
+            vb.customize ["modifyvm", :id, "--cpus", "2"]
+          end
+
+          tcp5.vm.network "private_network", ip: "192.168.50.105", virtualbox__intnet: "tcp_network", nic_type: "virtio"
+  end
+
+  config.vm.define "trader1" do |tcp6|
+          tcp6.vm.hostname = "trader1"
+
+          tcp6.vm.provider :virtualbox do |vb|
+            vb.customize ["modifyvm", :id, "--memory", "256"]
+            vb.customize ["modifyvm", :id, "--cpus", "2"]
+          end
+
+          tcp6.vm.network "private_network", ip: "192.168.50.106", virtualbox__intnet: "tcp_network", nic_type: "virtio"
+  end
+
+  config.vm.define "trader2" do |tcp7|
+          tcp7.vm.hostname = "trader2"
+
+          tcp7.vm.provider :virtualbox do |vb|
+            vb.customize ["modifyvm", :id, "--memory", "256"]
+            vb.customize ["modifyvm", :id, "--cpus", "2"]
+          end
+
+          tcp7.vm.network "private_network", ip: "192.168.50.107", virtualbox__intnet: "tcp_network", nic_type: "virtio"
+  end
+
+
+
+
+end

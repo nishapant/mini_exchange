@@ -45,8 +45,7 @@ impl OrderBook {
         //use order_id and get price from book
         //remove from price linked list
         //clone the list,modify the clone,  remove map entry, insert new one
-        //modify bid_max and ask_mint
-
+        //modify bid_max and ask_min
         //let mut list = self.prices[&self.book[&order_id].unit_price].as_ref().unwrap().clone();
         let mut list = self.prices.get_mut(&self.book[&order_id].unit_price).unwrap().as_mut().unwrap();
         let mut i = 0;
@@ -60,6 +59,7 @@ impl OrderBook {
         }
         //insert new list into price levels (should override previous list) and remove from book
         self.book.remove(&order_id);
+
     }
 
 

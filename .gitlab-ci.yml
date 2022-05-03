@@ -18,12 +18,17 @@ stages:          # List of stages for jobs, and their order of execution
   - test
   - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
+
+
+rust-nightly-build-job: # This job runs in the build stage, which runs first.
   stage: build
+  image: rustlang/rust:nightly
   script:
     - echo "Compiling the code..."
-#    - cargo build
-    - echo "Compile complete."
+    - cargo build --verbose
+    - - echo "Compile complete."
+  allow_failure: true
+
 
 unit-tests-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.

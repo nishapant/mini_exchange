@@ -58,6 +58,7 @@ rust-latest:
   stage: build
   image: rust:latest
   script:
+    - cargo install --debug cargo-make
     - cargo build --verbose
     - cargo test --verbose
 

@@ -25,10 +25,10 @@ rust-nightly-build-job: # This job runs in the build stage, which runs first.
     - echo "Compiling the code..."
 #    - rustup update
     - pwd
-    - cd src
+#    - cd src
 #    - cargo install
 #    - cargo fix --edition
-    - curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+#    - curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
     - cargo --version
     - rustc --version
     - cargo build

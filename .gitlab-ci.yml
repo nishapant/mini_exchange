@@ -32,7 +32,7 @@ rust-nightly-build-job: # This job runs in the build stage, which runs first.
     - cargo --version
     - rustc --version
     - cargo build
-    - echo "Compile complete."
+#    - echo "Compile complete."
 #  allow_failure: true
 
 

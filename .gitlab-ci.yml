@@ -58,15 +58,12 @@ rust-latest:
   stage: build
   image: rust:latest
   script:
-    - cargo install --debug cargo-make
     - cargo build --verbose
-    - cargo test --verbose
 
 rust-nightly:
   stage: build
   image: rustlang/rust:nightly
   script:
     - cargo build --verbose
-    - cargo test --verbose
   allow_failure: true
 

@@ -23,6 +23,8 @@ rust-nightly-build-job: # This job runs in the build stage, which runs first.
   image: rustlang/rust:nightly
   script:
     - echo "Compiling the code..."
+    - cargo --version
+    - rustup --version
     - cargo build
     - echo "Compile complete."
   allow_failure: true

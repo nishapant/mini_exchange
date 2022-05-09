@@ -2,6 +2,7 @@
 use std::env;
 mod trade;
 mod orderbook;
+use bincod;
 //mod esb;
 
 

@@ -41,7 +41,7 @@ impl OrderBook {
     }
 
 
-    pub fn remove(&mut self, order_id: u64) {
+    pub fn remove(&mut self, order_id: u64) -> bool {
         //use order_id and get price from book
         //remove from price linked list
         //clone the list,modify the clone,  remove map entry, insert new one
@@ -59,12 +59,12 @@ impl OrderBook {
         }
         //insert new list into price levels (should override previous list) and remove from book
         self.book.remove(&order_id);
-
+        return true;
     }
 
 
 
-    pub fn insert(&mut self, trade: Trade) {
+    pub fn insert(&mut self, trade: Trade) -> bool {
         //insert into hashmap and then add to the appropriate arrays linked list
         self.book.insert(trade.order_id, trade);
         //true is bid(buyers) and false is ask(seller)
@@ -83,15 +83,17 @@ impl OrderBook {
         } else if trade.trade_type == Sell && trade.unit_price < self.ask_min {
             self.ask_min = trade.unit_price;
         }
+        return true;
     }
 
 
-    pub fn modify(&mut self, order_id: u64, trade_input: Trade) {
+    pub fn modify(&mut self, order_id: u64, trade_input: Trade) -> bool {
         if trade_input.order_id != order_id {
-            return; //modify fails
+            return false; //modify fails
         }
-        self.remove(order_id);
-        self.insert(trade_input);
+        let one = self.remove(order_id);
+        let two = self.insert(trade_input);
+        return one && two;
     }
 
     // //Could create and return a spread struct that contains bid and ask, not sure about the best implementation
@@ -165,7 +167,7 @@ impl OrderBook {
 
         for trade in &orders_filled {
             if trade.qty == 0 {
-                println!("SIZE IS {}", orders_filled.len());
+                //println!("SIZE IS {}", orders_filled.len());
                 self.remove(trade.order_id);
             }
         }
@@ -179,7 +181,7 @@ impl OrderBook {
 
     //TODO create another function that routes to add/modify/match based on order type
     //Enforce that route and maybe "fn top" are the only point of interaction w the order book
-    pub fn route(&mut self, incoming_trade: Trade) {
+    pub fn route(&mut self, incoming_trade: Trade)  { //-> Vec<OrderUpdate>
     //if the order id already exists then send it to modify or cancel??????
         if self.book.contains_key(&incoming_trade.order_id) && self.book[&incoming_trade.order_id].trader_id == incoming_trade.trader_id  {
             if incoming_trade.unit_price == 0 { //cancel if the price is 0
@@ -192,6 +194,23 @@ impl OrderBook {
         }
     }
 
+    pub fn trade_to_order_update(trades: Vec<Trade>) {
+        order_updates : Vec<OrderUpdate> = Vec![];
+        for t in trades {
+            order_update = OrderUpdate {
+                trader_id: t.trader_id,
+                order_id: t.order_id,
+                order_type: t.Ordertype,
+                unit_price: f64, //make sure prices are modified correctly earlier
+                qty: t.qty, //make sure the correct quantity is set earlier
+                time_stamp: SystemTime::now(),
+                status: Status
+            }
+        }
+
+    }
+
+}
 
     #[cfg(any(test, test_utilities))]
     pub fn generate_random_trade() -> Trade {

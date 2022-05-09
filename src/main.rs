@@ -6,11 +6,11 @@ use std::io::{Read, Write};
 use std::str;
 use std::time::Duration;
 use std::thread;
-use serde::{Serialize, Deserialize};
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
 use std::net::UdpSocket;
+use bincode;
 
 // https://github.com/rust-lang/rustlings/blob/master/exercises/threads/threads1.rs
 struct JobStatus {
@@ -18,6 +18,12 @@ struct JobStatus {
 }
 
 fn main() {
+    let target: Option<String>  = Some("hello world".to_string());
+
+    let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
+    let decoded: Option<String> = bincode::deserialize(&encoded[..]).unwrap();
+    assert_eq!(target, decoded);
+
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);
     let (client_sender, client_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
@@ -85,6 +91,7 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&s
                 match socket.recv_from(&mut data) {
                     Ok( (mut number_of_bytes, mut src_addr) ) => {
                         let filled_buf = &mut data[..number_of_bytes];
+                        // println!("recevied data: {}", filled_buf);
                     },
                     Err(e) => {
                         println!("failed to send message: {}", e);
@@ -147,12 +154,10 @@ fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum OrderType  {
     Market
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Trade {
     pub trader_id: u32,
     pub stock_id: u32, //we could leave this blank and assume that our exchange only trades one asset type

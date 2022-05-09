@@ -30,7 +30,7 @@ pub struct OrderUpdate {
     pub trader_id: u8,
     pub order_id: u64,
     pub order_type: OrderType,
-    pub unit_price: f64,
+    pub unit_price: u64,
     pub qty: u32,
     pub time_stamp: SystemTime,
     pub status: Status

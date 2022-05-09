@@ -10,6 +10,7 @@ use serde::{Serialize, Deserialize};
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
+use std::net::UdpSocket;
 
 // https://github.com/rust-lang/rustlings/blob/master/exercises/threads/threads1.rs
 struct JobStatus {
@@ -61,16 +62,47 @@ fn main() {
 }
 
 // this should be used to handle each individual connection with the matchine engine, dropcopy, tickerplant
-fn handle_udp_connection(udp_host: &str, udp_port: i32) {
-    // let connection_string = format!("{}:{}", udp_host, udp_port);
-    // let socket = UdpSocket::bind(connection_string).expect("couldn't bind to address");
+fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&str>) {
+    let connection_string = format!("{}:{}", udp_host, udp_port);
+    let socket = UdpSocket::bind(connection_string);
+    let d = Duration::from_millis(10);
+    socket.set_read_timeout(d);
+    socket.set_write_timeout(d);
+
+    loop {
+        let d = Duration::from_millis(10);
+        // check channel to see if theres something that needs to be sent to client
+        let new_msg = msg_channel.recv_timeout(d);
+        if  new_msg.is_ok() {
+            // send message in stream to connection
+            // shouldn't this represent sending a message over a connection> 
+            socket.send(new_msg);
+            println!("sent message: {}", new_msg.ok().unwrap());
+        }
+
+        let mut data = [0 as u8; 512]; // using 512 byte buffer
+        match socket.recv_from(mut &data) {
+            Ok(_) => {
+                println!("recevied data: {}", str::from_utf8(&data).unwrap());
+                // unserialize the message 
+            },
+            Err(e) => {
+                // error 
+                // println!("there was an error reading");
+                // continue;
+            }
+        }
+
+
+        
+    }
+
 
     
 }
 
 // this should be used to handle client connections
 fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&str>) {
-
     let connection_string = format!("{}:{}", tcp_host, tcp_port);
     match TcpStream::connect(connection_string) {
         Ok(mut stream) => {
@@ -81,21 +113,21 @@ fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&s
                 let d = Duration::from_millis(10);
                 // check channel to see if theres something that needs to be sent to client
                 let new_msg = msg_channel.recv_timeout(d);
-                // println!("checking channel");
                 if  new_msg.is_ok() {
-                    // println!("message is ok");
-                    // send the message back to the client
+                    // send message in stream to connection
                     stream.write(new_msg.ok().unwrap().as_bytes()).unwrap();
                     println!("sent message: {}", new_msg.ok().unwrap());
                 }
                 
                 // println!("receiving message");
 
-                let mut data = [0 as u8; 512]; // using 256 byte buffer
+                let mut data = [0 as u8; 512]; // using 512 byte buffer
 
+                // read message in connection stream
                 match stream.read(&mut data) {
                     Ok(_) => {
                         println!("recevied data: {}", str::from_utf8(&data).unwrap());
+                        // unserialize the message 
                     },
                     Err(e) => {
                         // error 
@@ -110,7 +142,6 @@ fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&s
             println!("failed to connect: {}", e);
         }
     }
-    println!("reached the end of the method");
 }
 
 fn print_type_of<T>(_: &T) {

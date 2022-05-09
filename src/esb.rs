@@ -1,45 +1,51 @@
-use std::net::{TcpStream};
-use std::io::{Read, Write};
-use std::str::from_utf8;
+use std::io;
+use std::net::{Ipv4Addr, SocketAddr, ToSocketAddrs, UdpSocket};
+use std::time::Duration;
 
-pub fn esb_logic() {
-    // let ip_address = 
-    // let port = 8080
-    // let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+pub enum ESB{
 
-    // for stream in listener.incoming() {
-    //     let stream = stream.unwrap();
+}
 
-    //     println!("Connection established!");
-    // }
+impl ESB {
+    //For now this is just a wrapper around some functions from https://doc.rust-lang.org/stable/std/net/struct.UdpSocket.html
 
-    match TcpStream::connect("localhost:3333") {
-        Ok(mut stream) => {
-            println!("Successfully connected to server in port 3333");
-
-            let msg = b"Hello!";
-
-            stream.write(msg).unwrap();
-            println!("Sent Hello, awaiting reply...");
-
-            let mut data = [0 as u8; 6]; // using 6 byte buffer
-            match stream.read_exact(&mut data) {
-                Ok(_) => {
-                    if &data == msg {
-                        println!("Reply is ok!");
-                    } else {
-                        let text = from_utf8(&data).unwrap();
-                        println!("Unexpected reply: {}", text);
-                    }
-                },
-                Err(e) => {
-                    println!("Failed to receive data: {}", e);
-                }
-            }
-        },
-        Err(e) => {
-            println!("Failed to connect: {}", e);
-        }
+    pub fn bind<A: ToSocketAddrs>(addr: A) -> io::Result<UdpSocket> {
+        return UdpSocket::bind(addr);
     }
-    println!("Terminated.");
+
+    pub fn recv_from( socket: UdpSocket, buf: &mut [u8]) -> io::Result<(usize, SocketAddr)> {
+        return UdpSocket::recv_from(&socket, buf);
+    }
+
+    pub fn join_multicast_v4(socket: UdpSocket, multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> io::Result<()> {
+        return UdpSocket::join_multicast_v4(&socket, multiaddr, interface)
+    }
+
+    pub fn leave_multicast_v4(socket: UdpSocket, multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> io::Result<()> {
+        return UdpSocket::leave_multicast_v4(&socket, multiaddr, interface);
+    }
+
+    pub fn send_to<A: ToSocketAddrs>(socket: UdpSocket, buf: &[u8], addr: A) -> io::Result<usize> {
+        return UdpSocket::send_to(&socket, buf, addr);
+    }
+
+    pub fn set_multicast_loop_v4(socket: UdpSocket, multicast_loop_v4: bool) -> io::Result<()> {
+        return UdpSocket::set_multicast_loop_v4(&socket, multicast_loop_v4);
+    }
+
+    pub fn multicast_loop_v4(socket: UdpSocket) -> io::Result<bool> {
+        return UdpSocket::multicast_loop_v4(&socket);
+    }
+
+    pub fn set_read_timeout(socket: UdpSocket, dur: Option<Duration>) -> io::Result<()> {
+        return UdpSocket::set_read_timeout(&socket, dur);
+    }
+
+    pub fn set_multicast_ttl_v4(socket: UdpSocket, multicast_ttl_v4: u32) -> io::Result<()> {
+        return UdpSocket::set_multicast_ttl_v4(&socket, multicast_ttl_v4);
+    }
+
+    pub fn multicast_ttl_v4(socket: UdpSocket) -> io::Result<u32> {
+        return UdpSocket::multicast_ttl_v4(&socket);
+    }
 }

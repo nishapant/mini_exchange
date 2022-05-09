@@ -64,41 +64,40 @@ fn main() {
 // this should be used to handle each individual connection with the matchine engine, dropcopy, tickerplant
 fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&str>) {
     let connection_string = format!("{}:{}", udp_host, udp_port);
-    let socket = UdpSocket::bind(connection_string);
-    let d = Duration::from_millis(10);
-    socket.set_read_timeout(d);
-    socket.set_write_timeout(d);
+    match UdpSocket::bind(connection_string) {
+        Ok(mut socket) => {
+            let d = Duration::from_millis(10);
+            socket.set_read_timeout(Some(d));
+            socket.set_write_timeout(Some(d));
 
-    loop {
-        let d = Duration::from_millis(10);
-        // check channel to see if theres something that needs to be sent to client
-        let new_msg = msg_channel.recv_timeout(d);
-        if  new_msg.is_ok() {
-            // send message in stream to connection
-            // shouldn't this represent sending a message over a connection> 
-            socket.send(new_msg);
-            println!("sent message: {}", new_msg.ok().unwrap());
-        }
-
-        let mut data = [0 as u8; 512]; // using 512 byte buffer
-        match socket.recv_from(mut &data) {
-            Ok(_) => {
-                println!("recevied data: {}", str::from_utf8(&data).unwrap());
-                // unserialize the message 
-            },
-            Err(e) => {
-                // error 
-                // println!("there was an error reading");
-                // continue;
-            }
-        }
-
-
+            loop {
+                let d = Duration::from_millis(10);
+                // check channel to see if theres something that needs to be sent to client
+                let new_msg = msg_channel.recv_timeout(d);
+                if  new_msg.is_ok() {
+                    // send message in stream to connection
+                    // shouldn't this represent sending a message over a connection> 
+                    socket.send(new_msg.ok().unwrap().as_bytes());
+                    println!("sent message: {}", new_msg.ok().unwrap());
+                }
         
-    }
+                let mut data = [0 as u8; 512]; // using 512 byte buffer
+                match socket.recv_from(&mut data) {
+                    Ok( (mut number_of_bytes, mut src_addr) ) => {
+                        let filled_buf = &mut data[..number_of_bytes];
+                    },
+                    Err(e) => {
+                        println!("failed to send message: {}", e);
+                    }
+                }
+            }
 
+        },
 
-    
+        Err(e) => {
+            println!("failed to connect: {}", e);
+        }
+    } 
 }
 
 // this should be used to handle client connections

@@ -1,10 +1,11 @@
 #![feature(type_ascription)]
+
 use std::env;
 mod trade;
 mod client;
-// mod orderbook;
-// mod client; 
-
+use std::collections::HashMap;
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener};
+use text_io::read;
 
 /**
  * 5 Args should look like the following
@@ -16,14 +17,41 @@ mod client;
  */
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let mut ip_addrs = HashMap::new();
+
+    ip_addrs.insert(1, "192.168.50.106:8082");
+    ip_addrs.insert(2, "192.168.50.107:8083");
+    ip_addrs.insert(2, "192.168.50.108:8084");
+
     let input = &args[1];
-    // loop {
+
     if input == "1" || input == "ome" {
         //run ome
         println!("hi");
     } else if input == "2" || input == "client" {
         //run client
-        client::get_trade_from_client();
+        println!("Enter the trader id (1, 2, or 3)");
+        let trader_id: u64 = read!("{}\n");
+        let curr_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
+        // let trade = client::get_trade_from_client();
+        let listener = TcpListener::bind(curr_ip_addr).unwrap();
+        assert_eq!(listener.local_addr().unwrap(),
+           SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8080)));
+
+        // for stream in listener.incoming() {
+        //     let stream = stream.unwrap();
+
+        //     handle_connection(stream);
+        // }
     }
-    // }
 }
+
+
+
+// fn handle_connection(mut stream: TcpStream) {
+//     let mut buffer = [0; 1024];
+
+//     stream.read(&mut buffer).unwrap();
+
+//     println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+// }

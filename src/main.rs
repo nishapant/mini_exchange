@@ -11,6 +11,7 @@ use std::sync::mpsc::{Sender, Receiver};
 use std::sync::mpsc;
 use std::net::UdpSocket;
 use bincode;
+use std::net::SocketAddr;
 
 // https://github.com/rust-lang/rustlings/blob/master/exercises/threads/threads1.rs
 struct JobStatus {
@@ -55,11 +56,24 @@ fn main() {
         status_shared.jobs_completed += 1;
     });
 
+    // thread::spawn(|| handle_udp_connection("localhost", 8080, matching_engine_receiver));
+
+    // thread::spawn(move || {
+    //     // threads can add stuff to channel that needs to be sent across 
+    //     let thread_matching_engine_sender = matching_engine_sender.clone();
+        
+    //     thread_matching_engine_sender.send("udp message").unwrap();
+    //     thread::sleep(Duration::from_millis(200));
+
+    //     let mut status_shared = status_shared.lock().unwrap();
+    //     status_shared.jobs_completed += 1;
+    // });
+
 
     let mut jobs_completed: u32;
     loop {
         jobs_completed = status.lock().unwrap().jobs_completed;
-        if jobs_completed < 2 {
+        if jobs_completed < 3 {
             thread::sleep(Duration::from_millis(100));
         } else {
             break;
@@ -68,10 +82,14 @@ fn main() {
 }
 
 // this should be used to handle each individual connection with the matchine engine, dropcopy, tickerplant
-fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&str>) {
-    let connection_string = format!("{}:{}", udp_host, udp_port);
-    match UdpSocket::bind(connection_string) {
-        Ok(mut socket) => {
+fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&str>) {   
+    let remote_addr = format!("{}:{}", udp_host, udp_port);
+    println!("trying to connect");
+
+    let socket = UdpSocket::bind("0.0.0.0:6060".parse::<SocketAddr>().unwrap()).unwrap();
+    match socket.connect(remote_addr) {
+        Ok(_) => {
+            println!("successfully connected");
             let d = Duration::from_millis(10);
             socket.set_read_timeout(Some(d));
             socket.set_write_timeout(Some(d));
@@ -86,7 +104,7 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&s
                     socket.send(new_msg.ok().unwrap().as_bytes());
                     println!("sent message: {}", new_msg.ok().unwrap());
                 }
-        
+
                 let mut data = [0 as u8; 512]; // using 512 byte buffer
                 match socket.recv_from(&mut data) {
                     Ok( (mut number_of_bytes, mut src_addr) ) => {
@@ -94,17 +112,17 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&s
                         // println!("recevied data: {}", filled_buf);
                     },
                     Err(e) => {
-                        println!("failed to send message: {}", e);
+                        // println!("failed to send message: {}", e);
                     }
                 }
+            
             }
-
         },
-
         Err(e) => {
             println!("failed to connect: {}", e);
         }
-    } 
+
+    }
 }
 
 // this should be used to handle client connections

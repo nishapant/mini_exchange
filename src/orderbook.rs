@@ -194,23 +194,22 @@ impl OrderBook {
         }
     }
 
-    pub fn trade_to_order_update(trades: Vec<Trade>) {
-        order_updates : Vec<OrderUpdate> = Vec![];
-        for t in trades {
-            order_update = OrderUpdate {
-                trader_id: t.trader_id,
-                order_id: t.order_id,
-                order_type: t.Ordertype,
-                unit_price: f64, //make sure prices are modified correctly earlier
-                qty: t.qty, //make sure the correct quantity is set earlier
-                time_stamp: SystemTime::now(),
-                status: Status
-            }
-        }
+    // pub fn trade_to_order_update(trades: Vec<Trade>) {
+    //     order_updates : Vec<OrderUpdate> = Vec![];
+    //     for t in trades {
+    //         order_update = OrderUpdate {
+    //             trader_id: t.trader_id,
+    //             order_id: t.order_id,
+    //             order_type: t.Ordertype,
+    //             unit_price: f64, //make sure prices are modified correctly earlier
+    //             qty: t.qty, //make sure the correct quantity is set earlier
+    //             time_stamp: SystemTime::now(),
+    //             status: Status
+    //         }
+    //     }
+    //
+    // }
 
-    }
-
-}
 
     #[cfg(any(test, test_utilities))]
     pub fn generate_random_trade() -> Trade {

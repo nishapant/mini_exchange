@@ -2,7 +2,7 @@ use std::time::SystemTime;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Trade {
-    pub trader_id: u8,
+    pub trader_id: u8, //
     pub stock_id: u16, //we could leave this blank and assume that our exchange only trades one asset type
     pub order_id: u64, //number assigned by the gateway that is sent back to the trader and used to edit/cancel orders
     pub trade_type: TradeType, //buy or sell

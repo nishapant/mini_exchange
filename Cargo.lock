@@ -23,6 +23,7 @@ dependencies = [
 name = "group_05_project"
 version = "0.1.0"
 dependencies = [
+<<<<<<< HEAD
  "ntest",
  "rand",
 ]
@@ -195,3 +196,9 @@ name = "wasi"
 version = "0.10.2+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
+
+[[package]]
+name = "text_io"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "442f2674e6bd8489052b958e0eaebd89c26eefa3be9dc359d1e2ecccdc510f45"

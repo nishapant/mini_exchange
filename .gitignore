@@ -1,4 +1,4 @@
-.idea
-/target/
+/.idea/
 /.vagrant/
-/impl_notes.pages
+impl_notes.pages
+target/

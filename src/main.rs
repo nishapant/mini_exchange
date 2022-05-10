@@ -7,7 +7,6 @@ mod esb;
 mod client;
 
 
-
 /**
  * 5 Args should look like the following
  * 1. trader_id - this client's trader id, should be int

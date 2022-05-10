@@ -33,25 +33,21 @@ fn main() {
         println!("Enter the trader id (1, 2, or 3)");
         let trader_id: u64 = read!("{}\n");
         let curr_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
-        // let trade = client::get_trade_from_client();
+        let trade = client::get_trade_from_client();
         let listener = TcpListener::bind(curr_ip_addr).unwrap();
-        assert_eq!(listener.local_addr().unwrap(),
-           SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 8080)));
 
-        // for stream in listener.incoming() {
-        //     let stream = stream.unwrap();
+        for stream in listener.incoming() {
+            let stream = stream.unwrap();
 
-        //     handle_connection(stream);
-        // }
+            handle_connection(stream);
+        }
     }
 }
 
+fn handle_connection(mut stream: TcpStream) {
+    let mut buffer = [0; 1024];
 
+    stream.read(&mut buffer).unwrap();
 
-// fn handle_connection(mut stream: TcpStream) {
-//     let mut buffer = [0; 1024];
-
-//     stream.read(&mut buffer).unwrap();
-
-//     println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
-// }
+    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+}

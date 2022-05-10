@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener};
 use std::net::TcpStream;
 use text_io::read;
+use std::io::Read;
 
 /**
  * 5 Args should look like the following

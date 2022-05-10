@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #![feature(linked_list_remove)]
 #![feature(type_ascription)]
 use std::env;

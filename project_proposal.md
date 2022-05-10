@@ -76,8 +76,14 @@ In addition, we would also write a basic test app harnesses, which would make mu
 ## Initial Work Assignment
 - Akhil - Develop and test order book & matching engine, integration & system tests, Vagrant VM setup
 - Akul - Develop and test order book & matching engine, integration & system tests
-- Aman - Trader, Gateway
+- Aman - Trader (Client), Gateway
 - Nisha - Ticker Plant, Dropcopy
+
+## Final Work Assignment
+- Akhil - order book & matching engine, Vagrant VM setup, CI/CD setup, integration & system tests,
+- Akul - Dropcopy, UDP, integration & system tests
+- Aman - Trader (Client), Ticker Plant, integration & system tests
+- Nisha - Gateway, TCP, UDP, integration & system tests
 
 ## Member System Specs
 | Name  |                     OS                     |  RAM  |            Processor             |

@@ -8,6 +8,7 @@ use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener};
 use std::net::TcpStream;
 use text_io::read;
 use std::io::Read;
+use std::io::Write;
 
 /**
  * 5 Args should look like the following
@@ -39,13 +40,25 @@ fn main() {
         let listener = TcpListener::bind(curr_ip_addr).unwrap();
 
         for stream in listener.incoming() {
-            let stream = stream.unwrap();
-
-            let mut buffer = [0; 1024];
-
-            stream.read(&mut buffer).unwrap();
-
-            println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+            match stream {
+                Ok(mut stream) => {
+                    println!("New connection: {}", stream.peer_addr().unwrap());
+                    let mut data = [0 as u8; 50]; // using 50 byte buffer
+                    match stream.read(&mut data) {
+                        Ok(size) => {
+                            // echo everything!
+                            stream.write(&data[0..size]).unwrap();
+                        },
+                        Err(_) => {
+                            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
+                        }
+                    }
+                }
+                Err(e) => {
+                    println!("Error: {}", e);
+                    /* connection failed */
+                }
+            }
         }
     }
 }

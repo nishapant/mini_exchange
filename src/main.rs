@@ -26,6 +26,11 @@ fn main() {
     ip_addrs.insert(2, "192.168.50.107:8083");
     ip_addrs.insert(2, "192.168.50.108:8084");
 
+    if len(args) < 2 {
+        println!("Please enter the arguments");
+        return
+    }
+
     let input = &args[1];
 
     if input == "1" || input == "ome" {

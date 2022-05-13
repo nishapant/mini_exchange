@@ -19,6 +19,7 @@ struct JobStatus {
 }
 
 fn main() {
+    // serialization
     let target: Option<String>  = Some("hello world".to_string());
 
     let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
@@ -27,16 +28,13 @@ fn main() {
 
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);
-    let (client_sender, client_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
-    let (matching_engine_sender, matching_engine_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
-    let (dropcopy_sender, dropcopy_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
-    let (tickerplant_sender, tickerplant_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
+    let (trader1_sender, trader1_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
 
-    thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, client_receiver));
+    thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, trader1_receiver));
 
     thread::spawn(move || {
         // threads can add stuff to channel that needs to be sent across 
-        let thread_client_sender = client_sender.clone();
+        let thread_client_sender = trader1_sender.clone();
         thread_client_sender.send("hello").unwrap();
         thread::sleep(Duration::from_millis(200));
 

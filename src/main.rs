@@ -26,8 +26,8 @@ fn main() {
     ip_addrs.insert(2, "192.168.50.107:8083");
     ip_addrs.insert(2, "192.168.50.108:8084");
 
-    if len(args) < 2 {
-        println!("Please enter the arguments");
+    if args.len() < 2 {
+        println!("Please enter the correct arguments");
         return
     }
 

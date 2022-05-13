@@ -22,7 +22,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mut ip_addrs = HashMap::new();
 
-    ip_addrs.insert(1, "0.0.0.0:8082");
+    ip_addrs.insert(1, "192.168.50.106:8082");
     ip_addrs.insert(2, "192.168.50.107:8083");
     ip_addrs.insert(2, "192.168.50.108:8084");
 

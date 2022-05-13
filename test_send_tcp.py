@@ -1,7 +1,7 @@
 import socket
 
 HOST = "192.168.50.106"  # The server's hostname or IP address
-PORT = 8082  # The port used by the server\
+PORT = 8082  # The port used by the server
 
 print("hello")
 

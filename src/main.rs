@@ -22,7 +22,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mut ip_addrs = HashMap::new();
 
-    ip_addrs.insert(1, "192.168.50.106:8082");
+    ip_addrs.insert(1, "0.0.0.0:8082");
     ip_addrs.insert(2, "192.168.50.107:8083");
     ip_addrs.insert(2, "192.168.50.108:8084");
 
@@ -41,8 +41,9 @@ fn main() {
         println!("Enter the trader id (1, 2, or 3)");
         let trader_id: u64 = read!("{}\n");
         let curr_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
-        let trade = client::get_trade_from_client();
+        // let trade = client::get_trade_from_client();
         let listener = TcpListener::bind(curr_ip_addr).unwrap();
+        println!("Server listening on port 8082");
 
         for stream in listener.incoming() {
             match stream {

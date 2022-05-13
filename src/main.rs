@@ -32,7 +32,7 @@ fn main() {
     let (dropcopy_sender, dropcopy_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
     let (tickerplant_sender, tickerplant_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
 
-    thread::spawn(|| handle_tcp_connection("localhost", 8881, client_receiver));
+    thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, client_receiver));
 
     thread::spawn(move || {
         // threads can add stuff to channel that needs to be sent across 
@@ -85,8 +85,9 @@ fn main() {
 fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&str>) {   
     let remote_addr = format!("{}:{}", udp_host, udp_port);
     println!("trying to connect");
+    let local_addr = format!("192.168.50.105:{}", udp_port);
 
-    let socket = UdpSocket::bind("0.0.0.0:6060".parse::<SocketAddr>().unwrap()).unwrap();
+    let socket = UdpSocket::bind(local_addr.parse::<SocketAddr>().unwrap()).unwrap();
     match socket.connect(remote_addr) {
         Ok(_) => {
             println!("successfully connected");
@@ -128,8 +129,10 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&s
 // this should be used to handle client connections
 fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&str>) {
     let connection_string = format!("{}:{}", tcp_host, tcp_port);
+    println!("hello");
     match TcpStream::connect(connection_string) {
         Ok(mut stream) => {
+            println!("what's up");
             // the connection was successful
             stream.set_nonblocking(true).expect("set to non-blocking");
             println!("successfully connected to {}:{}", tcp_host, tcp_port);

@@ -52,7 +52,7 @@ fn main() {
             let trade = client::get_trade_from_client();
             let main_client_sender = client_sender.clone();
             let encoded: Vec<u8> = bincode::serialize(&trade).unwrap();
-            main_client_sender.send(str::from_utf8(&encoded).unwrap()).unwrap();
+            main_client_sender.send(str::from_utf8(&encoded).unwrap().to_string()).unwrap();
             // need to sleep so the thread doesn't combine messages
             thread::sleep(Duration::from_millis(200));
         }

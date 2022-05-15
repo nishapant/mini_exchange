@@ -7,11 +7,12 @@ mod orderbook;
 mod esb;
 mod client;
 use std::collections::HashMap;
-use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener};
-use std::net::TcpStream;
 use text_io::read;
-use std::io::Read;
-use std::io::Write;
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+use std::str;
 
 /**
  * 5 Args should look like the following
@@ -43,32 +44,19 @@ fn main() {
         //run client
         println!("Enter the trader id (1, 2, or 3)");
         let trader_id: u64 = read!("{}\n");
-        let curr_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
-        // let trade = client::get_trade_from_client();
-        let listener = TcpListener::bind(curr_ip_addr).unwrap();
-        println!("Server listening on port 8082");
+        let local_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
+        let (client_sender, client_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
+        thread::spawn(|| client::start_server(local_ip_addr, client_receiver));
 
-        for stream in listener.incoming() {
-            match stream {
-                Ok(mut stream) => {
-                    println!("New connection: {}", stream.peer_addr().unwrap());
-                    let mut data = [0 as u8; 50]; // using 50 byte buffer
-                    match stream.read(&mut data) {
-                        Ok(size) => {
-                            // echo everything!
-                            stream.write(&data[0..size]).unwrap();
-                            
-                        },
-                        Err(_) => {
-                            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
-                        }
-                    }
-                }
-                Err(e) => {
-                    println!("Error: {}", e);
-                    /* connection failed */
-                }
-            }
+        loop {
+            let trade = client::get_trade_from_client();
+            let main_client_sender = client_sender.clone();
+            let encoded: Vec<u8> = bincode::serialize(&trade).unwrap();
+            main_client_sender.send(str::from_utf8(&encoded).unwrap()).unwrap();
+            // need to sleep so the thread doesn't combine messages
+            thread::sleep(Duration::from_millis(200));
         }
+
+
     }
 }

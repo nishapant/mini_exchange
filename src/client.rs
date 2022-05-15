@@ -2,6 +2,13 @@ use text_io::read;
 use crate::trade::{Trade, TradeType, OrderType};
 use crate::trade::OrderType::{Limit, Market};
 use crate::trade::TradeType::{Buy, Sell};
+use std::sync::mpsc::{Receiver};
+use std::net::{TcpListener};
+use std::time::Duration;
+use std::io::Write;
+use std::net::TcpStream;
+use std::io::Read;
+use std::str;
 
 pub fn get_trade_from_client() -> Trade {
     loop {
@@ -20,9 +27,6 @@ pub fn get_trade_from_client() -> Trade {
     
         println!("Enter the quantity of shares you want to trade.");
         let qty: u32 = read!("{}\n");
-    
-    
-    
     
         println!("Enter an order type. 1:Limit 2:Market");
         temp: u64 = read!("{}\n");
@@ -55,5 +59,45 @@ pub fn get_trade_from_client() -> Trade {
         println!("{:?}", new_trade);
     
         return new_trade;
+    }
+}
+
+pub fn start_server(curr_ip_addr: &str, msg_channel: Receiver<String>) {
+    let listener = TcpListener::bind(curr_ip_addr).unwrap();
+    println!("Server listening on port 8082");
+
+    for stream in listener.incoming() {
+        match stream {
+            Ok(mut stream) => {
+                println!("New connection: {}", stream.peer_addr().unwrap());
+                stream.set_nonblocking(true).expect("set to non-blocking");
+
+                loop {
+                    // poll the channel here for orders that need to be sent
+                    let d = Duration::from_millis(10);
+                    let new_msg = msg_channel.recv_timeout(d);
+                    if  new_msg.is_ok() {
+                        // send message in stream to connection
+                        stream.write(new_msg.ok().unwrap().as_bytes()).unwrap();
+                        println!("sent message: {}", new_msg.ok().unwrap());
+                    }    
+
+                    let mut data = [0 as u8; 512]; // using 50 byte buffer
+                    match stream.read(&mut data) {
+                        Ok(size) => {
+                            //TODO: deserialize the object
+                            println!("recevied data: {}", str::from_utf8(&data).unwrap());
+                        },
+                        Err(_) => {
+                            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Error: {}", e);
+                /* connection failed */
+            }
+        }
     }
 }

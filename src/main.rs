@@ -113,6 +113,7 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<St
                 match socket.recv_from(&mut data) {
                     Ok( (mut number_of_bytes, mut src_addr) ) => {
                         let filled_buf = &mut data[..number_of_bytes];
+                        // check trader id -> based on trader id, put on the correct channel for the trader
                         // println!("recevied data: {}", filled_buf);
                     },
                     Err(e) => {
@@ -132,7 +133,6 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<St
 // this should be used to handle client connections
 fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel_receiver: Receiver<String>, udp_sender: Sender<String>) {
     let connection_string = format!("{}:{}", tcp_host, tcp_port);
-    println!("hello");
     match TcpStream::connect(connection_string) {
         Ok(mut stream) => {
             println!("what's up");
@@ -155,7 +155,8 @@ fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel_receiver: Re
                 // read message in connection stream
                 match stream.read(&mut data) {
                     Ok(_) => {
-                        // add to udp channel
+                        // add to udp channel 
+                        // TODO: deserialize and validate struct
                         udp_sender.send(str::from_utf8(&data).unwrap().to_string()).unwrap();
                         println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         // unserialize the message 

@@ -28,28 +28,32 @@ fn main() {
 
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);
-    let (trader1_sender, trader1_receiver) : (Sender<&str>, Receiver<&str>) = mpsc::channel();
+    let (trader1_sender, trader1_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
+    let (trader2_sender, trader2_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
+    let (trader3_sender, trader3_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
+    let (udp_sender, udp_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
 
-    thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, trader1_receiver));
+
+    thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, trader1_receiver, udp_sender));
 
     thread::spawn(move || {
         // threads can add stuff to channel that needs to be sent across 
         let thread_client_sender = trader1_sender.clone();
-        thread_client_sender.send("hello").unwrap();
+        thread_client_sender.send("hello".to_string()).unwrap();
         thread::sleep(Duration::from_millis(200));
 
         let msg = "loop iteration";
-        thread_client_sender.send(msg).unwrap();
+        thread_client_sender.send(msg.to_string()).unwrap();
         thread::sleep(Duration::from_millis(200));
 
         let msg = "this is the third messages";
-        thread_client_sender.send(msg).unwrap();
+        thread_client_sender.send(msg.to_string()).unwrap();
         for i in 0..5 {
             println!("in loop");
             thread::sleep(Duration::from_millis(100));
         }
         let msg = "this is the fourth";
-        thread_client_sender.send(msg).unwrap();
+        thread_client_sender.send(msg.to_string()).unwrap();
         let mut status_shared = status_shared.lock().unwrap();
         status_shared.jobs_completed += 1;
     });
@@ -80,7 +84,7 @@ fn main() {
 }
 
 // this should be used to handle each individual connection with the matchine engine, dropcopy, tickerplant
-fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&str>) {   
+fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<String>) {   
     let remote_addr = format!("{}:{}", udp_host, udp_port);
     println!("trying to connect");
     let local_addr = format!("192.168.50.105:{}", udp_port);
@@ -99,8 +103,9 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&s
                 let new_msg = msg_channel.recv_timeout(d);
                 if  new_msg.is_ok() {
                     // send message in stream to connection
-                    // shouldn't this represent sending a message over a connection> 
-                    socket.send(new_msg.ok().unwrap().as_bytes());
+                    // shouldn't this represent sending a message over a connection 
+                    let msg_to_send = new_msg.as_ref().ok().unwrap();
+                    socket.send(msg_to_send.as_bytes());
                     println!("sent message: {}", new_msg.ok().unwrap());
                 }
 
@@ -125,7 +130,7 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<&s
 }
 
 // this should be used to handle client connections
-fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&str>) {
+fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel_receiver: Receiver<String>, udp_sender: Sender<String>) {
     let connection_string = format!("{}:{}", tcp_host, tcp_port);
     println!("hello");
     match TcpStream::connect(connection_string) {
@@ -137,20 +142,21 @@ fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel: Receiver<&s
             loop {
                 let d = Duration::from_millis(10);
                 // check channel to see if theres something that needs to be sent to client
-                let new_msg = msg_channel.recv_timeout(d);
+                let new_msg = msg_channel_receiver.recv_timeout(d);
                 if  new_msg.is_ok() {
-                    // send message in stream to connection
-                    stream.write(new_msg.ok().unwrap().as_bytes()).unwrap();
+                    // send message in stream to connection 
+                    let msg_to_send = new_msg.as_ref().ok().unwrap();
+                    stream.write(msg_to_send.as_bytes()).unwrap();
                     println!("sent message: {}", new_msg.ok().unwrap());
                 }
                 
-                // println!("receiving message");
-
                 let mut data = [0 as u8; 512]; // using 512 byte buffer
 
                 // read message in connection stream
                 match stream.read(&mut data) {
                     Ok(_) => {
+                        // add to udp channel
+                        udp_sender.send(str::from_utf8(&data).unwrap().to_string()).unwrap();
                         println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         // unserialize the message 
                     },

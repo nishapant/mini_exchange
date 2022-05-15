@@ -2,11 +2,10 @@ use text_io::read;
 use crate::trade::{Trade, TradeType, OrderType};
 use crate::trade::OrderType::{Limit, Market};
 use crate::trade::TradeType::{Buy, Sell};
-use std::sync::mpsc::{Receiver};
+use std::sync::mpsc::{Receiver, Sender};
 use std::net::{TcpListener};
 use std::time::Duration;
 use std::io::Write;
-use std::net::TcpStream;
 use std::io::Read;
 use std::str;
 
@@ -62,7 +61,7 @@ pub fn get_trade_from_client() -> Trade {
     }
 }
 
-pub fn start_server(curr_ip_addr: &str, msg_channel: Receiver<String>) {
+pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<String>, gateway_msg_channel_sender: Sender<String>) {
     let listener = TcpListener::bind(curr_ip_addr).unwrap();
     println!("Server listening on port 8082");
 
@@ -70,12 +69,13 @@ pub fn start_server(curr_ip_addr: &str, msg_channel: Receiver<String>) {
         match stream {
             Ok(mut stream) => {
                 println!("New connection: {}", stream.peer_addr().unwrap());
+                // the read method will not block
                 stream.set_nonblocking(true).expect("set to non-blocking");
 
                 loop {
                     // poll the channel here for orders that need to be sent
                     let d = Duration::from_millis(10);
-                    let new_msg = msg_channel.recv_timeout(d);
+                    let new_msg = msg_channel_receiver.recv_timeout(d);
                     if  new_msg.is_ok() {
                         // send message in stream to connection
                         let msg_to_send = new_msg.as_ref().ok().unwrap();
@@ -83,11 +83,12 @@ pub fn start_server(curr_ip_addr: &str, msg_channel: Receiver<String>) {
                         println!("sent message: {}", new_msg.ok().unwrap());
                     }    
 
+                    // read from the stream
                     let mut data = [0 as u8; 512]; // using 50 byte buffer
                     match stream.read(&mut data) {
                         Ok(size) => {
-                            //TODO: deserialize the object
-                            println!("recevied data: {}", str::from_utf8(&data).unwrap());
+                            gateway_msg_channel_sender.send(str::from_utf8(&data).unwrap().to_string()).unwrap();
+                            // println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         },
                         Err(_) => {
                             println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());

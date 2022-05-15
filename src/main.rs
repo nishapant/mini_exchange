@@ -46,9 +46,20 @@ fn main() {
         let trader_id: u64 = read!("{}\n");
         let local_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
         let (client_sender, client_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
-        thread::spawn(|| client::start_server(local_ip_addr, client_receiver));
+        let (msg_from_gateway_sender, msg_from_gateway_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
+        thread::spawn(|| client::start_server(local_ip_addr, client_receiver, msg_from_gateway_sender));
 
+        // continually ask for trades to send and append to the message channel.
+        // the other thread will continually poll the message channel to see if there's
+        // another message to send
         loop {
+            // poll msg_from_gateway channel to check if there is a message received
+            let d = Duration::from_millis(10);
+            let new_msg = msg_from_gateway_receiver.recv_timeout(d);
+            if  new_msg.is_ok() {
+                println!("received message from gateway: {}", new_msg.ok().unwrap());
+            }    
+
             let trade = client::get_trade_from_client();
             let main_client_sender = client_sender.clone();
             let encoded: Vec<u8> = bincode::serialize(&trade).unwrap();
@@ -56,7 +67,5 @@ fn main() {
             // need to sleep so the thread doesn't combine messages
             thread::sleep(Duration::from_millis(200));
         }
-
-
     }
 }

@@ -1,10 +1,7 @@
 use std::collections::{HashMap, LinkedList};
-use std::time::SystemTime;
-use crate::trade::{OrderUpdate, Trade, TradeType};
+use crate::trade::{Trade};
 use crate::trade::OrderType::{Limit, Market};
 use crate::trade::TradeType::{Buy, Sell};
-use rand::Rng;
-use ntest::timeout;
 
 
 //TODO make book and prices only visible for tests

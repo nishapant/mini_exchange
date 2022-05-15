@@ -58,7 +58,9 @@ fn main() {
             let new_msg = msg_from_gateway_receiver.recv_timeout(d);
             if  new_msg.is_ok() {
                 println!("received message from gateway: {}", new_msg.ok().unwrap());
-            }    
+            } else {
+                // TODO: THROW ERROR
+            }   
 
             let trade = client::get_trade_from_client();
             let main_client_sender = client_sender.clone();

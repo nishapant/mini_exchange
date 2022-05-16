@@ -79,6 +79,7 @@ pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<String>, 
                     if  new_msg.is_ok() {
                         // send message in stream to connection
                         let msg_to_send = new_msg.as_ref().ok().unwrap();
+                        println!(msg_to_send);
                         stream.write(msg_to_send.as_bytes()).unwrap();
                         println!("sent message: {}", new_msg.ok().unwrap());
                     }    

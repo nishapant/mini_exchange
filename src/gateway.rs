@@ -148,7 +148,7 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Strin
                     Ok(_) => {
                         // add to udp channel 
                         // TODO: deserialize and validate struct
-                        if (str::from_utf8(&data).unwrap().eq("")) {
+                        if str::from_utf8(&data).unwrap().eq("") {
                             udp_sender.send(str::from_utf8(&data).unwrap().to_string()).unwrap();
                             println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         }

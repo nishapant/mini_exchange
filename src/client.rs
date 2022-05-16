@@ -55,7 +55,7 @@ pub fn get_trade_from_client() -> Trade {
             partial_fill: true, // always will partial fill in OME
             expiration_date : 0 // unused as well, just set to 0
         } ;
-        println!("{:?}", new_trade);
+        // println!("{:?}", new_trade);
     
         return new_trade;
     }

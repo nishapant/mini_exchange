@@ -143,6 +143,7 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u
                     let msg_to_send = new_msg.as_ref().ok().unwrap();
                     let decoded: Trade = bincode::deserialize(&msg_to_send).unwrap();
                     stream.write(msg_to_send).unwrap();
+                    stream.write("testing").unwrap();
                     println!("sent message: {:?}", decoded);
                 }
                 

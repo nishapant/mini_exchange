@@ -15,13 +15,8 @@ struct JobStatus {
     jobs_completed: u32,
 }
 
-fn main() {
+pub fn start_gatway() {
     // serialization
-    let target: Option<String>  = Some("hello world".to_string());
-
-    let encoded: Vec<u8> = bincode::serialize(&target).unwrap();
-    let decoded: Option<String> = bincode::deserialize(&encoded[..]).unwrap();
-    assert_eq!(target, decoded);
 
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);
@@ -81,6 +76,7 @@ fn main() {
 }
 
 // this should be used to handle each individual connection with the matchine engine, dropcopy, tickerplant
+// one to one connection
 fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<String>) {   
     let remote_addr = format!("{}:{}", udp_host, udp_port);
     println!("trying to connect");

@@ -59,7 +59,7 @@ fn main() {
             if  new_msg.is_ok() {
                 println!("received message from gateway: {}", new_msg.ok().unwrap());
             } else {
-                // TODO: THROW ERROR
+                panic!("message was not properly received");
             }   
 
             let trade = client::get_trade_from_client();
@@ -69,5 +69,7 @@ fn main() {
             // need to sleep so the thread doesn't combine messages
             thread::sleep(Duration::from_millis(200));
         }
+    } else if input == "3" || input == "gateway" {
+        
     }
 }

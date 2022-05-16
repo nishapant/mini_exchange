@@ -199,14 +199,14 @@ fn create_trade() -> Trade {
     return new_trade;
 }
 
-fn is_valid_order (trade_: trade::Trade) -> bool {
+fn is_valid_order (trade_: Trade) -> bool {
     // make sure the order type is correctly set
-    if trade_.trade_type!=trade::TradeType::Buy && trade_.trade_type!=trade::TradeType::Sell {
+    if trade_.trade_type!=Buy && trade_.trade_type!=Sell {
         return false;
     }
 
     // make sure OrderType is valid
-    if trade_.order_type!=trade::OrderType::Market && trade_.order_type!=trade::OrderType::Limit {
+    if trade_.order_type!=Market && trade_.order_type!=Limit {
         return false;
     }
 

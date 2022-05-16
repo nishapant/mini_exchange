@@ -63,7 +63,7 @@ fn main() {
                 println!("in here");
                 let msg_to_send = new_msg.as_ref().ok().unwrap();
                 let decoded: Trade = bincode::deserialize(&msg_to_send).unwrap();
-                println!("received message from gateway: {:?}", decoded);
+                println!("received message: {:?}", decoded);
             }
 
             let trade = client::get_trade_from_client();

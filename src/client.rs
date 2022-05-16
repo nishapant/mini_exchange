@@ -65,6 +65,8 @@ pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u8>>,
     let listener = TcpListener::bind(curr_ip_addr).unwrap();
     println!("Server listening on port 8082");
 
+    let gateway_msg_channel = gateway_msg_channel_sender.clone();
+
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
@@ -89,7 +91,7 @@ pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u8>>,
                     match stream.read(&mut data) {
                         Ok(size) => {
                             let mut data_to_send: Vec<u8> = data.to_vec();
-                            gateway_msg_channel_sender.send(data_to_send).unwrap();
+                            gateway_msg_channel.send(data_to_send).unwrap();
                             // println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         },
                         Err(_) => {

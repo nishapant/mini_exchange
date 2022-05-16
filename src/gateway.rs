@@ -18,7 +18,7 @@ struct JobStatus {
 pub fn start_gatway() {
     ip_addrs.insert(1, "192.168.50.106:8082");
     ip_addrs.insert(2, "192.168.50.107:8083");
-    ip_addrs.insert(2, "192.168.50.108:8084");
+    ip_addrs.insert(3, "192.168.50.108:8084");
 
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);

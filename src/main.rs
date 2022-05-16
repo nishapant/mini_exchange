@@ -6,6 +6,7 @@ mod trade;
 mod orderbook;
 mod esb;
 mod client;
+mod gateway;
 use std::collections::HashMap;
 use text_io::read;
 use std::sync::mpsc::{Sender, Receiver};
@@ -28,7 +29,7 @@ fn main() {
 
     ip_addrs.insert(1, "192.168.50.106:8082");
     ip_addrs.insert(2, "192.168.50.107:8083");
-    ip_addrs.insert(2, "192.168.50.108:8084");
+    ip_addrs.insert(3, "192.168.50.108:8084");
 
     if args.len() < 2 {
         println!("Please enter the correct arguments");
@@ -69,5 +70,7 @@ fn main() {
         }
     } else if input == "3" || input == "gateway" {
         // GATEWAY LOGIC
+        gateway::start_gatway();
+
     }
 }

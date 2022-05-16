@@ -180,7 +180,8 @@ impl OrderBook {
     //Enforce that route and maybe "fn top" are the only point of interaction w the order book
     pub fn route(&mut self, incoming_trade: Trade)  { //-> Vec<OrderUpdate>
         //if the order id already exists then send it to modify or cancel??????
-        if self.book.contains_key(&incoming_trade.order_id) && self.book[&incoming_trade.order_id].trader_id == incoming_trade.trader_id  {
+        if self.book.contains_key(&incoming_trade.order_id) && self.book[&incoming_trade.order_id].trader_id == incoming_trade.trader_id
+        && incoming_trade.trade_type != Market {
             if incoming_trade.unit_price == 0 { //cancel if the price is 0
                 self.remove(incoming_trade.order_id);
             } else { //otherwise modify

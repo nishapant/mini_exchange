@@ -14,6 +14,8 @@ use std::env;
 use crate::trade::{Trade, TradeType, OrderType};
 use crate::trade::OrderType::{Limit, Market};
 use crate::trade::TradeType::{Buy, Sell};
+use std::sync::atomic::{AtomicU64, Ordering};
+
 
 // https://github.com/rust-lang/rustlings/blob/master/exercises/threads/threads1.rs
 struct JobStatus {
@@ -128,9 +130,9 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<Ve
 
 // this should be used to handle client connections
 fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u8>>, udp_sender: Sender<Vec<u8>>) {
+    let mut order_id: u64 = 0;
     match TcpStream::connect(tcp_ip_addr) {
         Ok(mut stream) => {
-            println!("what's up");
             // the connection was successful
             stream.set_nonblocking(true).expect("set to non-blocking");
             println!("successfully connected to {}", tcp_ip_addr);
@@ -143,7 +145,6 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u
                     let msg_to_send = new_msg.as_ref().ok().unwrap();
                     let decoded: Trade = bincode::deserialize(&msg_to_send).unwrap();
                     stream.write(msg_to_send).unwrap();
-                    stream.write(b"testing").unwrap();
                     println!("sent message: {:?}", decoded);
                 }
                 
@@ -153,11 +154,17 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u
                 match stream.read(&mut data) {
                     Ok(_) => {
                         // add to udp channel 
-                        // TODO: deserialize and validate struct
-                        let decoded: Trade = bincode::deserialize(&data).unwrap();
-                        let mut data_to_send: Vec<u8> = data.to_vec();
-                        udp_sender.send(data_to_send).unwrap();
-                        println!("recevied data: {:?}", decoded);
+                        // deserialize and validate struct
+                        let mut decoded: Trade = bincode::deserialize(&data).unwrap();
+                        if is_valid_order(decoded) {
+                            decoded.order_id = order_id;
+                            order_id += 1;
+                            let new_encoded: Vec<u8> = bincode::serialize(&decoded).unwrap();
+                            udp_sender.send(new_encoded).unwrap();
+                            println!("recevied data: {:?}", decoded);
+                        }
+                       
+
                         
                         // unserialize the message 
                     },

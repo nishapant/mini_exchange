@@ -149,18 +149,15 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u
                 
                 let mut data = [0 as u8; 512]; // using 512 byte buffer
 
-
-
                 // read message in connection stream
                 match stream.read(&mut data) {
                     Ok(_) => {
                         // add to udp channel 
                         // TODO: deserialize and validate struct
-                        if !str::from_utf8(&data).unwrap().eq("") {
-                            let mut data_to_send: Vec<u8> = data.to_vec();
-                            udp_sender.send(data_to_send).unwrap();
-                            println!("recevied data: {}", str::from_utf8(&data).unwrap());
-                        }
+                        let decoded: Trade = bincode::deserialize(&data).unwrap();
+                        let mut data_to_send: Vec<u8> = data.to_vec();
+                        udp_sender.send(data_to_send).unwrap();
+                        println!("recevied data: {:?}", decoded);
                         
                         // unserialize the message 
                     },

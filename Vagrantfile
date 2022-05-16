@@ -177,16 +177,6 @@ Vagrant.configure("2") do |config|
   
   end
 
-  config.vm.define "trader3" do |tcp8|
-          tcp8.vm.hostname = "trader3"
-
-          tcp8.vm.provider :virtualbox do |vb|
-            vb.customize ["modifyvm", :id, "--memory", "256"]
-            vb.customize ["modifyvm", :id, "--cpus", "2"]
-          end
-
-          tcp8.vm.network "private_network", ip: "192.168.50.108", virtualbox__intnet: "tcp_network", nic_type: "virtio"
-  end
 
 
 end

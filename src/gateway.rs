@@ -16,7 +16,9 @@ struct JobStatus {
 }
 
 pub fn start_gatway() {
-    // serialization
+    ip_addrs.insert(1, "192.168.50.106:8082");
+    ip_addrs.insert(2, "192.168.50.107:8083");
+    ip_addrs.insert(2, "192.168.50.108:8084");
 
     let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
     let status_shared = Arc::clone(&status);
@@ -28,6 +30,8 @@ pub fn start_gatway() {
 
     thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, trader1_receiver, udp_sender));
 
+
+    // mimic the OME sending messages to the trader
     thread::spawn(move || {
         // threads can add stuff to channel that needs to be sent across 
         let thread_client_sender = trader1_sender.clone();

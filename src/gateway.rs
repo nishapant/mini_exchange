@@ -139,14 +139,16 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Strin
                     println!("sent message: {}", new_msg.ok().unwrap());
                 }
                 
-                let mut data = [0 as u8; 512] = null; // using 512 byte buffer
+                let mut data = [0 as u8; 512]; // using 512 byte buffer
+
+
 
                 // read message in connection stream
                 match stream.read(&mut data) {
                     Ok(_) => {
                         // add to udp channel 
                         // TODO: deserialize and validate struct
-                        if (data != null && data > 0) {
+                        if (str::from_utf8(&data).unwrap().eq("")) {
                             udp_sender.send(str::from_utf8(&data).unwrap().to_string()).unwrap();
                             println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         }

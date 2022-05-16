@@ -60,6 +60,7 @@ fn main() {
             let d = Duration::from_millis(10);
             let new_msg = msg_from_gateway_receiver.recv_timeout(d);
             if  new_msg.is_ok() {
+                println!("in here");
                 let msg_to_send = new_msg.as_ref().ok().unwrap();
                 let decoded: Trade = bincode::deserialize(&msg_to_send).unwrap();
                 println!("received message from gateway: {:?}", decoded);

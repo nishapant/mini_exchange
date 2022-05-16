@@ -173,3 +173,24 @@ fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<Strin
 fn print_type_of<T>(_: &T) {
     println!("{}", std::any::type_name::<T>())
 }
+
+
+fn is_valid_order (trade_: trade::Trade) -> bool {
+    // make sure the order type is correctly set
+    if trade_.trade_type!=trade::TradeType::Buy && trade_.trade_type!=trade::TradeType::Sell {
+        return false;
+    }
+
+    // make sure OrderType is valid
+    if trade_.order_type!=trade::OrderType::Market && trade_.order_type!=trade::OrderType::Limit {
+        return false;
+    }
+
+    // check quantity valid
+    if trade_.qty<=0 {
+        return false;
+    }
+
+    return true;
+}
+

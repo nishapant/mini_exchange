@@ -61,7 +61,7 @@ pub fn get_trade_from_client() -> Trade {
     }
 }
 
-pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u8>>, gateway_msg_channel_sender: Sender<Vec<u8>>) {
+pub fn start_server(curr_ip_addr: String, msg_channel_receiver: Receiver<Vec<u8>>, gateway_msg_channel_sender: Sender<Vec<u8>>) {
     let listener = TcpListener::bind(curr_ip_addr).unwrap();
     println!("Server listening on port 8082");
 

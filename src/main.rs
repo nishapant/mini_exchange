@@ -47,10 +47,11 @@ fn main() {
         //run client
         println!("Enter the trader id (1, 2, or 3)");
         let trader_id: u64 = read!("{}\n");
-        let local_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
+        let result = ip_addrs.get(&{trader_id});
+        let mut local_ip_addr = result.unwrap().to_string();
         let (client_sender, client_receiver) : (Sender<Vec<u8>>, Receiver<Vec<u8>>) = mpsc::channel();
         let (msg_from_gateway_sender, msg_from_gateway_receiver) : (Sender<Vec<u8>>, Receiver<Vec<u8>>) = mpsc::channel();
-        thread::spawn(|| client::start_server(local_ip_addr, client_receiver, msg_from_gateway_sender));
+        thread::spawn(move || client::start_server(local_ip_addr, client_receiver, msg_from_gateway_sender.clone()));
 
         // continually ask for trades to send and append to the message channel.
         // the other thread will continually poll the message channel to see if there's

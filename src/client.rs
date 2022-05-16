@@ -55,13 +55,13 @@ pub fn get_trade_from_client() -> Trade {
             partial_fill: true, // always will partial fill in OME
             expiration_date : 0 // unused as well, just set to 0
         } ;
-        println!("{:?}", new_trade);
+        // println!("{:?}", new_trade);
     
         return new_trade;
     }
 }
 
-pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<String>, gateway_msg_channel_sender: Sender<String>) {
+pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<Vec<u8>>, gateway_msg_channel_sender: Sender<Vec<u8>>) {
     let listener = TcpListener::bind(curr_ip_addr).unwrap();
     println!("Server listening on port 8082");
 
@@ -79,20 +79,21 @@ pub fn start_server(curr_ip_addr: &str, msg_channel_receiver: Receiver<String>, 
                     if  new_msg.is_ok() {
                         // send message in stream to connection
                         let msg_to_send = new_msg.as_ref().ok().unwrap();
-                        println!("in the client loop: ---- {}", msg_to_send);
-                        stream.write(msg_to_send.as_bytes()).unwrap();
-                        println!("sent message: {}", new_msg.ok().unwrap());
+                        let decoded: Trade = bincode::deserialize(&msg_to_send).unwrap();
+                        stream.write(msg_to_send).unwrap();
+                        println!("sent message: {:?}", decoded);
                     }    
 
                     // read from the stream
                     let mut data = [0 as u8; 512]; // using 50 byte buffer
                     match stream.read(&mut data) {
                         Ok(size) => {
-                            gateway_msg_channel_sender.send(str::from_utf8(&data).unwrap().to_string()).unwrap();
+                            let mut data_to_send: Vec<u8> = data.to_vec();
+                            gateway_msg_channel_sender.send(data_to_send).unwrap();
                             // println!("recevied data: {}", str::from_utf8(&data).unwrap());
                         },
                         Err(_) => {
-                            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
+                            // println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
                         }
                     }
                 }

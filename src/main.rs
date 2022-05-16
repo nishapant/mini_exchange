@@ -14,6 +14,8 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 use std::str;
+use crate::trade::{Trade, TradeType, OrderType};
+
 
 /**
  * 5 Args should look like the following
@@ -46,9 +48,9 @@ fn main() {
         println!("Enter the trader id (1, 2, or 3)");
         let trader_id: u64 = read!("{}\n");
         let local_ip_addr = ip_addrs.get(&{trader_id}).unwrap();
-        let (client_sender, client_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
-        let (msg_from_gateway_sender, msg_from_gateway_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
-        thread::spawn(|| client::start_server(local_ip_addr, client_receiver, msg_from_gateway_sender));
+        let (client_sender, client_receiver) : (Sender<Vec<u8>>, Receiver<Vec<u8>>) = mpsc::channel();
+        let (msg_from_gateway_sender, msg_from_gateway_receiver) : (Sender<Vec<u8>>, Receiver<Vec<u8>>) = mpsc::channel();
+        // thread::spawn(|| client::start_server(local_ip_addr, client_receiver, msg_from_gateway_sender));
 
         // continually ask for trades to send and append to the message channel.
         // the other thread will continually poll the message channel to see if there's
@@ -58,14 +60,18 @@ fn main() {
             let d = Duration::from_millis(10);
             let new_msg = msg_from_gateway_receiver.recv_timeout(d);
             if  new_msg.is_ok() {
-                println!("received message from gateway: {}", new_msg.ok().unwrap());
+                let msg_to_send = new_msg.as_ref().ok().unwrap();
+                let decoded: Trade = bincode::deserialize(&msg_to_send).unwrap();
+                println!("received message from gateway: {:?}", decoded);
             }
 
             let trade = client::get_trade_from_client();
             let main_client_sender = client_sender.clone();
+            // println!("{:?}", trade);
             let encoded: Vec<u8> = bincode::serialize(&trade).unwrap();
-            println!("------- message: {}", str::from_utf8(&encoded).unwrap().to_string());
-            main_client_sender.send(str::from_utf8(&encoded).unwrap().to_string()).unwrap();
+            let decoded: Trade = bincode::deserialize(&encoded).unwrap();
+
+            main_client_sender.send(encoded).unwrap();
             // need to sleep so the thread doesn't combine messages
             thread::sleep(Duration::from_millis(200));
         }
@@ -75,3 +81,8 @@ fn main() {
 
     }
 }
+
+
+// pub fn serialize(message: Trade) {
+
+// }

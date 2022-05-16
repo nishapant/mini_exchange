@@ -9,6 +9,9 @@ use std::sync::mpsc;
 use std::net::UdpSocket;
 use bincode;
 use std::net::SocketAddr;
+use std::collections::HashMap;
+use std::env;
+
 
 // https://github.com/rust-lang/rustlings/blob/master/exercises/threads/threads1.rs
 struct JobStatus {
@@ -16,6 +19,9 @@ struct JobStatus {
 }
 
 pub fn start_gatway() {
+    let args: Vec<String> = env::args().collect();
+    let mut ip_addrs = HashMap::new();
+
     ip_addrs.insert(1, "192.168.50.106:8082");
     ip_addrs.insert(2, "192.168.50.107:8083");
     ip_addrs.insert(3, "192.168.50.108:8084");
@@ -28,7 +34,7 @@ pub fn start_gatway() {
     let (udp_sender, udp_receiver) : (Sender<String>, Receiver<String>) = mpsc::channel();
 
 
-    thread::spawn(|| handle_tcp_connection("192.168.50.106", 8082, trader1_receiver, udp_sender));
+    thread::spawn(move || handle_tcp_connection(ip_addrs.get(&{1}).unwrap(), trader1_receiver, udp_sender));
 
 
     // mimic the OME sending messages to the trader
@@ -55,18 +61,6 @@ pub fn start_gatway() {
     });
 
     // thread::spawn(|| handle_udp_connection("localhost", 8080, matching_engine_receiver));
-
-    // thread::spawn(move || {
-    //     // threads can add stuff to channel that needs to be sent across 
-    //     let thread_matching_engine_sender = matching_engine_sender.clone();
-        
-    //     thread_matching_engine_sender.send("udp message").unwrap();
-    //     thread::sleep(Duration::from_millis(200));
-
-    //     let mut status_shared = status_shared.lock().unwrap();
-    //     status_shared.jobs_completed += 1;
-    // });
-
 
     let mut jobs_completed: u32;
     loop {
@@ -123,19 +117,17 @@ fn handle_udp_connection(udp_host: &str, udp_port: i32, msg_channel: Receiver<St
         Err(e) => {
             println!("failed to connect: {}", e);
         }
-
     }
 }
 
 // this should be used to handle client connections
-fn handle_tcp_connection(tcp_host: &str, tcp_port: i32, msg_channel_receiver: Receiver<String>, udp_sender: Sender<String>) {
-    let connection_string = format!("{}:{}", tcp_host, tcp_port);
-    match TcpStream::connect(connection_string) {
+fn handle_tcp_connection(tcp_ip_addr: &str, msg_channel_receiver: Receiver<String>, udp_sender: Sender<String>) {
+    match TcpStream::connect(tcp_ip_addr) {
         Ok(mut stream) => {
             println!("what's up");
             // the connection was successful
             stream.set_nonblocking(true).expect("set to non-blocking");
-            println!("successfully connected to {}:{}", tcp_host, tcp_port);
+            println!("successfully connected to {}", tcp_ip_addr);
             loop {
                 let d = Duration::from_millis(10);
                 // check channel to see if theres something that needs to be sent to client

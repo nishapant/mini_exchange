@@ -14,7 +14,7 @@ Traders connect directly to the gateway using TCP to send orders and receive ord
 
 - To generate, provision, and turn on the VMs, run vagrant up. Make sure that VirtualBox or another VM manager is installed. We have already installed all the packages that the VMs need to run.
 
-- `cd group-05-project`
+- `cd mini-exchange`
 - `vagrant up`
 
 
